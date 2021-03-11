@@ -3,8 +3,9 @@
 Oi! Bem vindo a lista de receitas do Gabe
 
 - Bolo de cenoura :carrot:
+
 - Bolo de chocolate :chocolate_bar:
 
-  
-  
+- Torta de Maça :green_apple:
+
   
