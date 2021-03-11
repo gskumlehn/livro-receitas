@@ -15,10 +15,9 @@
 ### Modo de preparo
 
 1. Bater os ovos, azeite, açúcar, as cenouras no liquidificador
-
-   	2. Despejar o conteúdo do liquidificador em uma vasilha, e acrescentar a farinha peneirada aos poucos, dobrando na massa
-   	3. Adicionar a água morna e o fermento, e misturar
-   	4. Colocar a massa em uma forma untada, e assar por 40 minutos em forno preaquecido a 180ºC
+2. Despejar o conteúdo do liquidificador em uma vasilha, e acrescentar a farinha peneirada aos poucos, dobrando na massa
+3. Adicionar a água morna e o fermento, e misturar
+4. Colocar a massa em uma forma untada, e assar por 40 minutos em forno preaquecido a 180ºC
 
 
 
