@@ -6,6 +6,6 @@ Oi! Bem vindo a lista de receitas do Gabe
 
 - Bolo de chocolate :chocolate_bar:
 
-- Torta de Maça :green_apple:
+- Torta de Maçã :green_apple:
 
   

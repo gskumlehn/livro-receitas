@@ -1,4 +1,4 @@
-# Torta de Maça :apple:
+# Torta de Maçã :green_apple:
 
 ### Ingredientes
 
@@ -75,11 +75,11 @@
 	1. Abrir uma das massas em um superfície enfarinhada
 
    	2. Transferir para uma forma
-   	3. Adicionar o recheio, formando uma superfície convexa (menos recheio nas bordas)
-   	4. Abrir a segunda massa, e cortar em fatias
-   	5. Entrelaçar as fatias
-   	6. Com as sobras, fazer a borda, sem deixar muito pontiaguda (evita queimar)
-   	7. Bater o ovo com a colher generosa de açúcar para pincelar sobre a massa
+      	3. Adicionar o recheio, formando uma superfície convexa (menos recheio nas bordas)
+         	4. Abrir a segunda massa, e cortar em fatias
+            	5. Entrelaçar as fatias
+               	6. Com as sobras, fazer a borda, sem deixar muito pontiaguda (evita queimar)
+                  	7. Bater o ovo com a colher generosa de açúcar para pincelar sobre a massa
 
 
 
