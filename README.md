@@ -6,6 +6,8 @@ Oi! Bem vindo a lista de receitas do Gabe
 
 - Bolo de Chocolate :chocolate_bar:
 
+- Brownie :chocolate_bar:
+
 - Massa de Pizza :pizza:
 
 - Mousse de Chocolate :mouse:
