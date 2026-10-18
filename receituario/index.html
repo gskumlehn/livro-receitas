@@ -1,0 +1,1005 @@
+<title>Receituário</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Courier+Prime:wght@400;700&display=swap">
+<style>
+/* Layout: uma tipografia antiga sobre papel envelhecido. Estante → livro → receita.
+   Duas tintas, como impressão de época: preto de chumbo e um vermelho de rubrica. */
+:root {
+  --paper: #EEE2C1;
+  --paper-deep: #E3D3A8;
+  --paper-hi: #F6EDD3;
+  --ink: #1D1912;
+  --ink-soft: #5B4F3B;
+  --rule: #A8966C;
+  --red: #8A2817;
+  --font-display: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
+  --font-caps: 'IM Fell English SC', 'IM Fell English', Georgia, serif;
+  --font-body: 'EB Garamond', Garamond, 'Times New Roman', serif;
+  --font-type: 'Courier Prime', 'Courier New', ui-monospace, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { background: var(--paper); }
+body {
+  margin: 0;
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(255,250,232,.55), transparent 60%),
+    radial-gradient(ellipse at 50% 120%, rgba(120,90,40,.18), transparent 55%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .26 0 0 0 0 .12 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 1.5;
+  padding-block: 0 72px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+::selection { background: var(--red); color: var(--paper-hi); }
+a { color: inherit; }
+button, input, textarea, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+@media (prefers-reduced-motion: no-preference) { .fade { animation: fade .35s ease both; } @keyframes fade { from { opacity: .4; transform: translateY(4px); } to { opacity: 1; transform: none; } } }
+
+.wrap { max-width: 1120px; margin: 0 auto; }
+.caps { font-family: var(--font-caps); letter-spacing: .06em; }
+.type { font-family: var(--font-type); }
+.muted { color: var(--ink-soft); }
+.rubric { color: var(--red); }
+
+/* ---------- cabeçalho ---------- */
+.masthead { padding-block: 28px 18px; text-align: center; border-bottom: 3px double var(--ink); margin-bottom: 28px; }
+.masthead .kicker { font-family: var(--font-caps); font-size: 14px; letter-spacing: .3em; color: var(--ink-soft); }
+.masthead h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(48px, 9vw, 92px); line-height: .95; margin: 6px 0 4px; letter-spacing: -.01em; }
+.masthead h1 i { color: var(--red); }
+.masthead .tag { font-style: italic; color: var(--ink-soft); margin: 0; }
+.nav { display: flex; justify-content: center; gap: 6px 22px; flex-wrap: wrap; margin-top: 16px; }
+.nav button { background: none; border: 0; padding: 4px 2px; font-family: var(--font-caps); font-size: 16px; letter-spacing: .12em; cursor: pointer; border-bottom: 1px solid transparent; }
+.nav button[aria-current="true"] { border-bottom-color: var(--red); color: var(--red); }
+.nav button:hover { color: var(--red); }
+
+/* ---------- botões e campos ---------- */
+.btn { display: inline-flex; align-items: center; gap: 8px; background: transparent; border: 1.5px solid var(--ink); padding: 7px 16px 6px; font-family: var(--font-caps); font-size: 15px; letter-spacing: .1em; cursor: pointer; border-radius: 1px; white-space: nowrap; }
+.btn:hover { background: var(--ink); color: var(--paper-hi); }
+.btn.solid { background: var(--ink); color: var(--paper-hi); }
+.btn.solid:hover { background: var(--red); border-color: var(--red); }
+.btn.red { border-color: var(--red); color: var(--red); }
+.btn.red:hover { background: var(--red); color: var(--paper-hi); }
+.btn.small { padding: 3px 10px 2px; font-size: 13px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn:disabled:hover { background: transparent; color: inherit; }
+.icon-btn { background: none; border: 1px solid var(--rule); width: 30px; height: 30px; display: inline-grid; place-items: center; cursor: pointer; font-size: 15px; line-height: 1; padding: 0; flex: none; }
+.icon-btn:hover { border-color: var(--ink); background: var(--paper-hi); }
+.icon-btn.del:hover { border-color: var(--red); color: var(--red); }
+
+label.f { display: grid; gap: 4px; min-width: 0; }
+label.f > span { font-family: var(--font-caps); font-size: 14px; letter-spacing: .1em; color: var(--ink-soft); }
+input[type=text], textarea, select {
+  width: 100%; min-width: 0; background: var(--paper-hi); border: 1px solid var(--rule); border-bottom: 1.5px solid var(--ink);
+  padding: 7px 10px; font-size: 17px; border-radius: 0;
+}
+input[type=text]:focus, textarea:focus, select:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 2px rgba(138,40,23,.25); }
+textarea { resize: vertical; min-height: 64px; line-height: 1.4; }
+input::placeholder, textarea::placeholder { color: #9C8D6E; font-style: italic; }
+.check { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; font-size: 16px; }
+.check input { width: 18px; height: 18px; accent-color: var(--red); }
+
+/* ---------- estante ---------- */
+.section-title { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--ink); padding-bottom: 6px; margin: 36px 0 20px; }
+.section-title h2 { font-family: var(--font-display); font-weight: 400; font-size: 32px; margin: 0; }
+.shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 24px; }
+.cover-card {
+  position: relative; display: grid; grid-template-rows: auto 1fr auto; gap: 10px; text-align: center;
+  aspect-ratio: 3 / 4; max-width: 100%; padding: 22px 18px 16px; cursor: pointer; border: 0;
+  background: var(--cloth, #6E2A1E); color: #F1E5C4;
+  box-shadow: inset 7px 0 0 rgba(0,0,0,.18), inset 9px 0 0 rgba(255,255,255,.06), 0 2px 0 rgba(0,0,0,.15), 0 10px 22px rgba(60,40,10,.22);
+  transition: transform .2s ease;
+}
+.cover-card:hover { transform: translateY(-3px); }
+.cover-card::before { content: ""; position: absolute; inset: 10px 10px 10px 16px; border: 1px solid rgba(241,229,196,.55); pointer-events: none; }
+.cover-card .ck { font-family: var(--font-caps); font-size: 12px; letter-spacing: .25em; opacity: .8; }
+.cover-card .ct { font-family: var(--font-display); font-size: 27px; line-height: 1.05; align-self: center; text-wrap: balance; overflow-wrap: anywhere; }
+.cover-card .cb { font-style: italic; font-size: 15px; opacity: .9; }
+.cover-card .draft { position: absolute; top: 14px; right: 14px; font-family: var(--font-caps); font-size: 11px; letter-spacing: .15em; background: #F1E5C4; color: var(--ink); padding: 1px 6px; }
+.new-card { aspect-ratio: 3 / 4; max-width: 100%; border: 1.5px dashed var(--ink-soft); background: transparent; cursor: pointer; display: grid; place-items: center; text-align: center; padding: 16px; }
+.new-card:hover { border-color: var(--red); color: var(--red); }
+.new-card b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 46px; line-height: 1; }
+.new-card span { font-family: var(--font-caps); letter-spacing: .12em; }
+.empty { border: 1px solid var(--rule); background: rgba(246,237,211,.6); padding: 22px 24px; font-style: italic; color: var(--ink-soft); }
+.notice { border-left: 3px solid var(--red); background: rgba(246,237,211,.7); padding: 12px 16px; margin: 0 0 20px; }
+
+/* ---------- livro (leitura) ---------- */
+.reader { max-width: 860px; margin: 0 auto; display: grid; gap: 28px; }
+.toolbar { display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between; align-items: center; }
+.toolbar .grp { display: flex; gap: 10px; flex-wrap: wrap; }
+.page {
+  background: var(--paper-hi);
+  background-image: linear-gradient(90deg, rgba(120,90,40,.07), transparent 7%, transparent 93%, rgba(120,90,40,.07));
+  box-shadow: 0 1px 0 rgba(0,0,0,.08), 0 14px 30px rgba(80,60,20,.16);
+  padding: clamp(26px, 6vw, 64px) clamp(18px, 6vw, 64px);
+  min-width: 0;
+}
+.title-page { text-align: center; display: grid; gap: 18px; padding-block: clamp(48px, 10vw, 110px); }
+.title-page .orn { font-family: var(--font-display); color: var(--red); font-size: 26px; letter-spacing: .5em; }
+.title-page h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(46px, 10vw, 86px); line-height: .98; margin: 0; text-wrap: balance; }
+.title-page .sub { font-style: italic; font-size: 22px; margin: 0; color: var(--ink-soft); }
+.title-page .by { font-family: var(--font-caps); letter-spacing: .2em; font-size: 17px; }
+.title-page .intro { max-width: 46ch; margin: 8px auto 0; text-align: left; font-size: 18px; }
+.title-page .intro::first-letter { font-family: var(--font-display); float: left; font-size: 3.4em; line-height: .8; padding: 6px 8px 0 0; color: var(--red); }
+.rule-orn { display: flex; align-items: center; gap: 12px; color: var(--ink-soft); }
+.rule-orn::before, .rule-orn::after { content: ""; flex: 1; border-top: 1px solid var(--rule); }
+
+.toc h3 { font-family: var(--font-display); font-weight: 400; font-size: 36px; margin: 0 0 18px; text-align: center; }
+.toc .tp { margin-top: 22px; }
+.toc .tp > div { font-family: var(--font-caps); letter-spacing: .14em; color: var(--red); font-size: 15px; margin-bottom: 4px; }
+.toc a { display: flex; align-items: baseline; gap: 8px; text-decoration: none; padding: 5px 0; font-size: 19px; cursor: pointer; }
+.toc a .dots { flex: 1; border-bottom: 1.5px dotted var(--rule); transform: translateY(-5px); min-width: 20px; }
+.toc a .n { font-family: var(--font-type); font-size: 14px; color: var(--ink-soft); }
+.toc a:hover .nm { color: var(--red); }
+
+.part-page { text-align: center; display: grid; gap: 10px; padding-block: clamp(56px, 12vw, 120px); }
+.part-page .pn { font-family: var(--font-caps); letter-spacing: .3em; color: var(--red); }
+.part-page h3 { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: clamp(44px, 9vw, 72px); line-height: 1; margin: 0; }
+.part-page p { font-style: italic; max-width: 44ch; margin: 6px auto 0; color: var(--ink-soft); }
+
+.rec-head { display: grid; gap: 10px; margin-bottom: 22px; }
+.rec-head .eb { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: var(--font-caps); letter-spacing: .14em; font-size: 14px; color: var(--ink-soft); }
+.rec-head h3 { font-family: var(--font-display); font-weight: 400; font-size: clamp(38px, 8vw, 60px); line-height: 1; margin: 0; text-wrap: balance; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 18px; list-style: none; margin: 0; padding: 8px 0 0; border-top: 1px solid var(--rule); font-family: var(--font-type); font-size: 14px; }
+.meta b { font-family: var(--font-caps); font-weight: 400; letter-spacing: .08em; color: var(--red); margin-right: 6px; font-size: 15px; }
+.sec-label { font-family: var(--font-display); font-style: italic; font-size: 24px; color: var(--red); margin: 18px 0 8px; }
+.notes, .tips { margin-top: 18px; font-size: 16.5px; }
+.notes h4, .tips h4 { font-family: var(--font-caps); font-weight: 400; letter-spacing: .12em; font-size: 15px; margin: 0 0 4px; color: var(--red); }
+.notes ul, .tips ul { margin: 0; padding-left: 1.2em; }
+.tips { border-top: 1px solid var(--rule); padding-top: 12px; }
+.tips li::marker { content: "☞  "; color: var(--red); }
+
+/* ---------- o cartão algorítmico ---------- */
+.card-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.card { width: 100%; border-collapse: collapse; border: 2px solid var(--ink); table-layout: fixed; background: var(--paper-hi); }
+.card col.c-ing { width: 34%; }
+@media (max-width: 700px) { .card { min-width: calc(12rem + var(--ops) * 5.5rem); } }
+.card td { border: 1px solid var(--ink); padding: 7px 9px; vertical-align: middle; font-size: 16px; line-height: 1.3; }
+.card td.ing { overflow-wrap: anywhere; }
+.card td.ing .q { font-family: var(--font-type); font-size: 14px; }
+.card td.ref { font-style: italic; color: var(--red); }
+.card td.pre { text-align: center; font-family: var(--font-caps); letter-spacing: .06em; background: var(--paper-deep); }
+.card td.op { text-align: center; font-size: 15.5px; padding: 7px 5px; }
+.card td.op .t { display: block; font-family: var(--font-type); font-size: 13px; color: var(--red); margin-top: 3px; }
+.card td.op.final { background: var(--ink); color: var(--paper-hi); font-family: var(--font-caps); letter-spacing: .05em; }
+.card td.op.final .t { color: #E9C9A8; font-family: var(--font-type); letter-spacing: 0; }
+.card td.fill { background: repeating-linear-gradient(135deg, transparent 0 5px, rgba(91,79,59,.22) 5px 6px); }
+.card td.blank { color: var(--ink-soft); font-style: italic; text-align: center; font-size: 14px; }
+.warn { margin-top: 10px; padding: 8px 12px; border: 1px dashed var(--red); color: var(--red); font-size: 15px; background: rgba(246,237,211,.8); }
+.warn b { font-family: var(--font-caps); font-weight: 400; letter-spacing: .08em; }
+
+/* ---------- editores ---------- */
+.editor { display: grid; gap: 22px; }
+.ed-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ed-head h2 { font-family: var(--font-display); font-weight: 400; font-size: 34px; margin: 0; }
+.savebar { position: sticky; bottom: max(10px, env(safe-area-inset-bottom, 0px)); z-index: 5; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--ink); color: var(--paper-hi); padding: 10px 14px; box-shadow: 0 8px 22px rgba(40,30,10,.3); }
+.savebar .st { font-style: italic; font-size: 16px; }
+.savebar .btn { border-color: var(--paper-hi); color: var(--paper-hi); }
+.savebar .btn:hover { background: var(--paper-hi); color: var(--ink); }
+.savebar .btn.solid { background: var(--paper-hi); color: var(--ink); }
+.savebar .btn.solid:hover { background: var(--red); color: var(--paper-hi); border-color: var(--red); }
+.panel { border: 1px solid var(--rule); background: rgba(246,237,211,.55); padding: 18px; display: grid; gap: 14px; min-width: 0; }
+.panel > h3 { font-family: var(--font-caps); font-weight: 400; letter-spacing: .14em; font-size: 17px; margin: 0; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.theme-block { border-top: 2px solid var(--ink); padding-top: 14px; display: grid; gap: 12px; }
+.theme-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: end; }
+.rec-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.rec-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px dotted var(--rule); }
+.rec-list .nm { font-size: 19px; }
+.rec-list .acts { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.rec-list select { width: auto; font-size: 14px; padding: 3px 6px; }
+
+.rec-editor { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 26px; align-items: start; }
+.rec-editor .preview { position: sticky; top: 16px; display: grid; gap: 10px; min-width: 0; }
+.preview-label { font-family: var(--font-caps); letter-spacing: .2em; font-size: 13px; color: var(--ink-soft); text-align: center; }
+.preview .page { padding: 24px 20px; max-height: calc(100vh - 60px); overflow: auto; }
+@media (max-width: 920px) { .rec-editor { grid-template-columns: minmax(0, 1fr); } .rec-editor .preview { position: static; } .preview .page { max-height: none; } }
+
+.rows { display: grid; gap: 8px; }
+.ing-row { display: grid; grid-template-columns: minmax(96px, 2.6fr) minmax(0, 3.6fr) auto auto auto auto; gap: 6px; align-items: center; }
+.ing-row .refc { font-size: 13px; white-space: nowrap; gap: 4px; }
+.meta-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto; gap: 6px; }
+@media (max-width: 520px) {
+  .ing-row { grid-template-columns: minmax(0, 1fr) auto auto auto; }
+  .ing-row input.qn { grid-column: 1 / -1; }
+}
+.step { border: 1px solid var(--rule); background: var(--paper-hi); padding: 12px; display: grid; gap: 10px; }
+.step-top { display: flex; align-items: center; gap: 8px; }
+.step-top .sn { font-family: var(--font-caps); letter-spacing: .1em; color: var(--red); white-space: nowrap; }
+.step-top .sp { flex: 1; }
+.step .grid2 { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 8px; }
+@media (max-width: 520px) { .step .grid2 { grid-template-columns: minmax(0, 1fr); } }
+.chips-label { font-family: var(--font-caps); letter-spacing: .1em; font-size: 13px; color: var(--ink-soft); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--ink-soft); background: transparent; padding: 2px 10px; font-size: 15px; cursor: pointer; border-radius: 999px; max-width: 100%; text-align: left; }
+.chip:hover { border-color: var(--ink); background: var(--paper); }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--paper-hi); border-color: var(--ink); }
+.chip.res { font-style: italic; border-style: dashed; }
+.chip.res[aria-pressed="true"] { border-style: solid; }
+.chip:disabled { opacity: .38; cursor: not-allowed; text-decoration: line-through; }
+.chip:disabled:hover { background: transparent; border-color: var(--ink-soft); }
+.hint { font-size: 15px; font-style: italic; color: var(--ink-soft); margin: 0; }
+.confirm-del { color: var(--red) !important; border-color: var(--red) !important; }
+
+footer.colo { text-align: center; margin-top: 56px; font-family: var(--font-caps); letter-spacing: .2em; font-size: 13px; color: var(--ink-soft); }
+
+/* ---------- impressão / exportação ---------- */
+@page { size: A4; margin: 16mm 14mm 18mm; }
+@media print {
+  body { background: #FBF6E8; padding: 0; font-size: 11pt; }
+  .masthead, .toolbar, .nav, footer.colo, .savebar { display: none !important; }
+  .reader { display: block; max-width: none; }
+  .page { box-shadow: none; background: transparent; padding: 0; break-before: page; }
+  .page:first-child { break-before: auto; }
+  .card { min-width: 0 !important; }
+  .card td { font-size: 10pt; padding: 5px 6px; }
+  .card tr, .sec { break-inside: avoid; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+
+<div class="wrap" lang="pt-BR">
+  <header class="masthead">
+    <div class="kicker">Tipografia de Cozinha · Est. MMXXVI</div>
+    <h1>Receit<i>u</i>ário</h1>
+    <p class="tag">Livros de receitas escritos como algoritmos: o que entra, em que ordem, e o que sai.</p>
+    <nav class="nav" aria-label="Seções">
+      <button type="button" data-nav="shelf" id="nav-shelf">A Estante</button>
+      <button type="button" data-nav="mine" id="nav-mine">Meus Livros</button>
+      <button type="button" data-nav="howto" id="nav-howto">Como Funciona</button>
+    </nav>
+  </header>
+  <main id="app" aria-live="polite">
+    <div class="empty">Abrindo a estante…</div>
+  </main>
+  <footer class="colo">Receituário · composto em IM Fell &amp; EB Garamond</footer>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ------------------------------------------------------------ estado
+  const S = {
+    db: null, user: null, uid: null, canWrite: false, ready: false, offline: false,
+    shelf: [],        // índices shelf/<uid>
+    featured: [],     // destaques/<id>
+    view: 'shelf',
+    book: null,       // livro aberto {src, owner, id, data}
+    edit: null,       // cópia em edição do livro
+    recEdit: null,    // {themeId, recipe}
+    dirty: false, saving: false, status: '',
+  };
+  const app = document.getElementById('app');
+  const CLOTHS = ['#6E2A1E', '#24384A', '#2F4A33', '#4A3524', '#5B2440', '#1F2A2E', '#7A5A1E'];
+
+  // ------------------------------------------------------------ utilidades
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const rid = () => Math.random().toString(36).slice(2, 10);
+  const roman = (n) => { const m = [[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']]; let r = ''; for (const [v, s] of m) while (n >= v) { r += s; n -= v; } return r; };
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+  const lines = (t) => String(t || '').split('\n').map((x) => x.trim()).filter(Boolean);
+  const nb = (s) => esc(s).replace(/(\d) (°C|°F|min|h\b|s\b|g\b|kg|ml|l\b)/g, '$1&nbsp;$2');
+
+  const newRecipe = () => ({
+    id: rid(), title: '',
+    meta: [{ k: 'Forno', v: '' }, { k: 'Tempo', v: '' }, { k: 'Rende', v: '' }],
+    sections: [newSection()],
+    notes: '', tips: '',
+  });
+  function newSection(label = '') {
+    return { id: rid(), label, pre: '', ings: [{ id: rid(), q: '', name: '', ref: false }], steps: [] };
+  }
+  const newBook = () => ({
+    id: rid(), title: 'Livro sem título', subtitle: '', byline: '', intro: '', published: false,
+    cloth: CLOTHS[Math.floor(Math.random() * CLOTHS.length)],
+    themes: [{ id: rid(), name: 'Primeiro capítulo', lede: '', recipes: [] }],
+  });
+  const countRecipes = (b) => (b.themes || []).reduce((a, t) => a + (t.recipes || []).length, 0);
+
+  // ------------------------------------------------------------ o algoritmo do cartão
+  // Cada seção: ingredientes (folhas) + passos (nós). Um passo junta ingredientes e resultados de passos anteriores.
+  function analyze(sec) {
+    const ingIdx = new Map(sec.ings.map((g, i) => [g.id, i]));
+    const stepIdx = new Map(sec.steps.map((s, i) => [s.id, i]));
+    const consumer = new Map();
+    sec.steps.forEach((s) => s.inputs.forEach((x) => consumer.set(x, s.id)));
+    const named = (g) => (g.name || g.q || '').trim();
+    const ings = sec.ings.filter(named);
+    const unused = ings.filter((g) => !consumer.has(g.id));
+    const roots = sec.steps.filter((s) => !consumer.has(s.id));
+    const build = (key) => {
+      if (ingIdx.has(key)) { const g = sec.ings[ingIdx.get(key)]; return { leaf: true, g }; }
+      const s = sec.steps[stepIdx.get(key)];
+      const ins = s.inputs
+        .filter((x) => ingIdx.has(x) ? named(sec.ings[ingIdx.get(x)]) : stepIdx.has(x))
+        .slice()
+        .sort((a, b) => {
+          const sa = stepIdx.has(a), sb = stepIdx.has(b);
+          if (sa !== sb) return sa ? -1 : 1;
+          return sa ? stepIdx.get(a) - stepIdx.get(b) : ingIdx.get(a) - ingIdx.get(b);
+        });
+      return { s, children: ins.map(build) };
+    };
+    const trees = roots.map((r) => build(r.id)).filter((t) => t.children.length);
+    const emptySteps = sec.steps.filter((s) => !s.inputs.length);
+    return { trees, unused, emptySteps, roots };
+  }
+
+  function layout(tree) {
+    const leaves = [];
+    const walk = (n) => {
+      if (n.leaf) { n.r0 = n.r1 = leaves.length; leaves.push(n); n.col = 0; return; }
+      n.children.forEach(walk);
+      n.r0 = n.children[0].r0; n.r1 = n.children.at(-1).r1;
+      n.col = Math.max(...n.children.map((c) => c.col)) + 1;
+    };
+    walk(tree);
+    const rects = [];
+    const collect = (n) => {
+      rects.push({ r: n.r0, c: n.col, rs: n.r1 - n.r0 + 1, cs: 1, node: n });
+      (n.children || []).forEach((ch) => {
+        if (ch.col + 1 < n.col) rects.push({ r: ch.r0, c: ch.col + 1, rs: ch.r1 - ch.r0 + 1, cs: n.col - ch.col - 1, fill: true });
+        collect(ch);
+      });
+    };
+    collect(tree);
+    return { rows: leaves.length, cols: tree.col + 1, rects, root: tree };
+  }
+
+  const opHtml = (s) => {
+    const t = lines(String(s.t || '').replace(/·/g, '\n')).map((x) => `<span class="t">${nb(x)}</span>`).join('');
+    return `${esc(s.op || '…')}${t}`;
+  };
+  const ingHtml = (g) => g.ref ? esc(g.name || g.q) : `${g.q ? `<span class="q">${esc(g.q)}</span> ` : ''}${esc(g.name)}`;
+
+  function tableHtml(tree, pre) {
+    const { rows, cols, rects, root } = layout(tree);
+    const at = new Map(rects.map((x) => [`${x.r},${x.c}`, x]));
+    let h = `<div class="card-wrap"><table class="card" style="--ops:${cols - 1}"><colgroup><col class="c-ing">${'<col>'.repeat(cols - 1)}</colgroup>`;
+    pre.forEach((p) => { h += `<tr><td class="pre" colspan="${cols}">${nb(p)}</td></tr>`; });
+    for (let r = 0; r < rows; r++) {
+      h += '<tr>';
+      for (let c = 0; c < cols; c++) {
+        const x = at.get(`${r},${c}`); if (!x) continue;
+        const sp = `${x.rs > 1 ? ` rowspan="${x.rs}"` : ''}${x.cs > 1 ? ` colspan="${x.cs}"` : ''}`;
+        if (x.fill) { h += `<td class="fill"${sp}></td>`; continue; }
+        const n = x.node;
+        if (n.leaf) h += `<td class="ing${n.g.ref ? ' ref' : ''}"${sp}>${ingHtml(n.g)}</td>`;
+        else h += `<td class="op${n === root ? ' final' : ''}"${sp}>${opHtml(n.s)}</td>`;
+      }
+      h += '</tr>';
+    }
+    return h + '</table></div>';
+  }
+
+  function sectionHtml(sec, { showWarnings }) {
+    const pre = lines(sec.pre);
+    const a = analyze(sec);
+    let h = '';
+    if (a.trees.length) a.trees.forEach((t, i) => { h += tableHtml(t, i === 0 ? pre : []); });
+    else {
+      const ings = sec.ings.filter((g) => (g.name || g.q || '').trim());
+      if (ings.length || pre.length) {
+        h += `<div class="card-wrap"><table class="card" style="--ops:1"><colgroup><col class="c-ing"><col></colgroup>`;
+        pre.forEach((p) => { h += `<tr><td class="pre" colspan="2">${nb(p)}</td></tr>`; });
+        ings.forEach((g, i) => { h += `<tr><td class="ing${g.ref ? ' ref' : ''}">${ingHtml(g)}</td>${i === 0 ? `<td class="blank" rowspan="${ings.length}">adicione um passo</td>` : ''}</tr>`; });
+        h += '</table></div>';
+      }
+    }
+    if (showWarnings) {
+      const w = [];
+      if (a.unused.length) w.push(`<b>Sem passo:</b> ${a.unused.map((g) => esc(g.name || g.q)).join(', ')}`);
+      if (a.trees.length > 1) w.push(`<b>${a.trees.length} finais:</b> crie um último passo que junte todos os resultados.`);
+      if (a.emptySteps.length) w.push(`<b>Passo vazio:</b> ${a.emptySteps.map((s) => esc(s.op || 'sem nome')).join(', ')}`);
+      if (w.length) h += `<div class="warn">${w.join('<br>')}</div>`;
+    }
+    return h;
+  }
+
+  function recipeHtml(rec, { num, total, themeName, showWarnings = false } = {}) {
+    const meta = (rec.meta || []).filter((m) => (m.v || '').trim());
+    const multi = rec.sections.length > 1;
+    const secs = rec.sections.map((s) => `<div class="sec">${(multi || s.label) && s.label ? `<div class="sec-label">${esc(s.label)}</div>` : ''}${sectionHtml(s, { showWarnings })}</div>`).join('');
+    const notes = lines(rec.notes), tips = lines(rec.tips);
+    return `
+      <header class="rec-head">
+        <div class="eb"><span>${num ? `Receita ${num}${total ? ` de ${total}` : ''}` : 'Receita'}</span><span>${esc(themeName || '')}</span></div>
+        <h3>${esc(rec.title || 'Receita sem título')}</h3>
+        ${meta.length ? `<ul class="meta">${meta.map((m) => `<li><b>${esc(m.k)}</b>${nb(m.v)}</li>`).join('')}</ul>` : ''}
+      </header>
+      ${secs}
+      ${notes.length ? `<div class="notes"><h4>Observações</h4><ul>${notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul></div>` : ''}
+      ${tips.length ? `<div class="tips"><h4>${tips.length > 1 ? 'Dicas' : 'Dica'}</h4><ul>${tips.map((n) => `<li>${esc(n)}</li>`).join('')}</ul></div>` : ''}`;
+  }
+
+  function bookPagesHtml(b, { linkable = true } = {}) {
+    const total = countRecipes(b);
+    let n = 0;
+    const toc = b.themes.map((t, ti) => `
+      <div class="tp"><div>${roman(ti + 1)} · ${esc(t.name)}</div>
+      ${t.recipes.map((r) => { n++; return `<a ${linkable ? `data-goto="r-${r.id}"` : `href="#r-${r.id}"`}><span class="nm">${esc(r.title || 'Sem título')}</span><span class="dots"></span><span class="n">${String(n).padStart(2, '0')}</span></a>`; }).join('') || '<p class="hint">Nenhuma receita ainda.</p>'}
+      </div>`).join('');
+    n = 0;
+    const body = b.themes.map((t, ti) => `
+      <section class="page part-page" id="t-${t.id}">
+        <div class="pn">Capítulo ${roman(ti + 1)}</div>
+        <h3>${esc(t.name)}</h3>
+        ${t.lede ? `<p>${esc(t.lede)}</p>` : ''}
+      </section>
+      ${t.recipes.map((r) => { n++; return `<article class="page" id="r-${r.id}">${recipeHtml(r, { num: String(n).padStart(2, '0'), total: String(total).padStart(2, '0'), themeName: t.name })}</article>`; }).join('')}`).join('');
+    return `
+      <section class="page title-page">
+        <div class="orn">❦</div>
+        <h2>${esc(b.title)}</h2>
+        ${b.subtitle ? `<p class="sub">${esc(b.subtitle)}</p>` : ''}
+        <div class="rule-orn">✦</div>
+        ${b.byline ? `<div class="by">${esc(b.byline)}</div>` : ''}
+        ${b.intro ? `<p class="intro">${esc(b.intro)}</p>` : ''}
+      </section>
+      <section class="page toc"><h3>Índice</h3>${toc}</section>
+      ${body}`;
+  }
+
+  // ------------------------------------------------------------ dados
+  const myIndexDoc = () => S.shelf.find((d) => d.uid === S.uid);
+
+  async function init() {
+    render();
+    let db = null, user = null;
+    try { [db, user] = await Promise.all([window.claude?.use?.('db'), window.claude?.use?.('user')]); } catch (e) { /* sem runtime */ }
+    S.db = db || null; S.user = user || null;
+    if (S.user) {
+      try { S.uid = await S.user.id(); } catch (e) { S.uid = null; }
+      try { const c = await S.user.can('data.write'); S.canWrite = c !== false && !!S.uid; } catch (e) { S.canWrite = !!S.uid; }
+    }
+    if (!S.db) { S.offline = true; S.canWrite = true; S.ready = true; render(); return; }
+    S.db.collection('shelf').onSnapshot((snap) => {
+      S.shelf = snap.docs.map((d) => ({ uid: d.id, ...(d.data() || {}) }));
+      S.ready = true; if (['shelf', 'mine'].includes(S.view)) render();
+    }, () => { S.ready = true; render(); });
+    S.db.collection('destaques').onSnapshot((snap) => {
+      S.featured = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
+      if (S.view === 'shelf') render();
+    }, () => {});
+  }
+
+  const LOCAL = { books: [] }; // modo sem servidor: livros em memória
+
+  async function fetchBook(src, owner, id) {
+    if (S.offline) return clone(LOCAL.books.find((b) => b.id === id));
+    const path = src === 'destaque' ? `destaques/${id}` : `shelf/${owner}/books/${id}`;
+    const snap = await S.db.doc(path).get();
+    return snap.exists ? clone(snap.data()) : null;
+  }
+
+  async function saveBook() {
+    if (S.saving || !S.edit) return;
+    S.saving = true; S.status = 'Salvando…'; paintSavebar();
+    const b = clone(S.edit); b.updatedAt = Date.now();
+    try {
+      if (S.offline) {
+        const i = LOCAL.books.findIndex((x) => x.id === b.id);
+        if (i >= 0) LOCAL.books[i] = b; else LOCAL.books.push(b);
+      } else {
+        await S.db.doc(`shelf/${S.uid}/books/${b.id}`).set(b);
+        const idx = clone(myIndexDoc()?.books || []).filter((x) => x.id !== b.id);
+        idx.push({ id: b.id, title: b.title, byline: b.byline, subtitle: b.subtitle, published: !!b.published, cloth: b.cloth, recipes: countRecipes(b), themes: b.themes.length, updatedAt: b.updatedAt });
+        await S.db.doc(`shelf/${S.uid}`).set({ books: idx });
+      }
+      S.dirty = false; S.status = 'Salvo';
+    } catch (e) {
+      S.status = e?.code === 'quota_exceeded' ? 'O espaço do app está cheio. Exclua um livro antigo e tente de novo.'
+        : e?.code === 'invalid_argument' ? 'Você não tem permissão para salvar aqui. Peça acesso de Colaborador ao dono do app.'
+        : 'Não foi possível salvar. Tente de novo em instantes.';
+    }
+    S.saving = false; paintSavebar();
+  }
+
+  async function deleteBook(id) {
+    try {
+      if (S.offline) LOCAL.books = LOCAL.books.filter((b) => b.id !== id);
+      else {
+        await S.db.doc(`shelf/${S.uid}/books/${id}`).delete();
+        const idx = clone(myIndexDoc()?.books || []).filter((x) => x.id !== id);
+        await S.db.doc(`shelf/${S.uid}`).set({ books: idx });
+      }
+    } catch (e) { /* mantém */ }
+    S.edit = null; S.dirty = false; go('mine');
+  }
+
+  // ------------------------------------------------------------ navegação
+  function go(view, extra = {}) {
+    Object.assign(S, extra); S.view = view; render(); window.scrollTo({ top: 0 });
+  }
+  function leaveGuard() {
+    if (S.dirty && !confirmLeave) { confirmLeave = true; S.status = 'Há alterações não salvas. Clique de novo para sair sem salvar.'; paintSavebar(); return false; }
+    confirmLeave = false; return true;
+  }
+  let confirmLeave = false;
+
+  document.addEventListener('click', async (ev) => {
+    const nav = ev.target.closest('[data-nav]');
+    if (nav) {
+      if ((S.view === 'editBook' || S.view === 'editRecipe') && !leaveGuard()) return;
+      S.dirty = false; S.edit = null; go(nav.dataset.nav); return;
+    }
+    const goto = ev.target.closest('[data-goto]');
+    if (goto) { ev.preventDefault(); document.getElementById(goto.dataset.goto)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    const open = ev.target.closest('[data-open]');
+    if (open) {
+      const [src, owner, id] = open.dataset.open.split('|');
+      app.innerHTML = '<div class="empty">Abrindo o livro…</div>';
+      const data = await fetchBook(src, owner, id);
+      if (!data) { go(S.view === 'mine' ? 'mine' : 'shelf'); return; }
+      go('book', { book: { src, owner, id, data } }); return;
+    }
+    const act = ev.target.closest('[data-act]');
+    if (act) handleAct(act.dataset.act, act, ev);
+  });
+
+  // ------------------------------------------------------------ renderização
+  function setNav() {
+    const cur = S.view === 'book' && S.book?.owner === S.uid ? 'mine' : ['editBook', 'editRecipe'].includes(S.view) ? 'mine' : S.view;
+    document.querySelectorAll('[data-nav]').forEach((b) => b.setAttribute('aria-current', String(b.dataset.nav === cur)));
+  }
+
+  function render() {
+    setNav();
+    const v = S.view;
+    if (v === 'shelf') app.innerHTML = shelfView();
+    else if (v === 'mine') app.innerHTML = mineView();
+    else if (v === 'howto') app.innerHTML = howtoView();
+    else if (v === 'book') app.innerHTML = bookView();
+    else if (v === 'editBook') app.innerHTML = editBookView();
+    else if (v === 'editRecipe') { app.innerHTML = editRecipeView(); paintPreview(); }
+    app.firstElementChild?.classList.add('fade');
+  }
+
+  const coverHtml = (b, open) => `
+    <button type="button" class="cover-card" style="--cloth:${esc(b.cloth || CLOTHS[0])}" data-open="${esc(open)}">
+      ${b.published === false ? '<span class="draft">Rascunho</span>' : ''}
+      <span class="ck">${b.recipes ?? countRecipes(b)} receitas</span>
+      <span class="ct">${esc(b.title || 'Sem título')}</span>
+      <span class="cb">${esc(b.byline || '')}</span>
+    </button>`;
+
+  function shelfView() {
+    if (!S.ready) return '<div class="empty">Abrindo a estante…</div>';
+    const pub = [];
+    S.featured.forEach((f) => pub.push(coverHtml({ ...f, recipes: countRecipes(f) }, `destaque||${f.id}`)));
+    S.shelf.forEach((d) => (d.books || []).filter((b) => b.published).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)).forEach((b) => pub.push(coverHtml(b, `shelf|${d.uid}|${b.id}`))));
+    if (S.offline) LOCAL.books.filter((b) => b.published).forEach((b) => pub.push(coverHtml(b, `local||${b.id}`)));
+    return `<div>
+      ${S.offline ? '<p class="notice">Você está vendo o Receituário fora do claude.ai. Dá para montar um livro e baixar, mas nada fica salvo nem aparece na estante.</p>' : ''}
+      <div class="section-title"><h2>A Estante</h2><span class="muted"><i>${pub.length} ${pub.length === 1 ? 'livro publicado' : 'livros publicados'}</i></span></div>
+      ${pub.length ? `<div class="shelf">${pub.join('')}</div>` : '<div class="empty">A estante ainda está vazia. Os livros publicados aparecem aqui assim que alguém marcar “Publicar na estante”.</div>'}
+    </div>`;
+  }
+
+  function mineView() {
+    if (!S.ready) return '<div class="empty">Abrindo a estante…</div>';
+    const mine = S.offline ? LOCAL.books.map((b) => ({ ...b, recipes: countRecipes(b) })) : (myIndexDoc()?.books || []);
+    const src = S.offline ? 'local' : 'shelf';
+    const cards = mine.slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)).map((b) => coverHtml(b, `${src}|${S.uid || ''}|${b.id}`)).join('');
+    if (!S.canWrite) return `<div><div class="section-title"><h2>Meus Livros</h2></div>
+      <div class="empty">${S.uid ? 'Seu acesso a este app é só de leitura. Para escrever um livro, peça ao dono para compartilhar com você como Colaborador.' : 'Entre no claude.ai para escrever e publicar seus livros.'}</div></div>`;
+    return `<div>
+      <div class="section-title"><h2>Meus Livros</h2><span class="muted"><i>Rascunhos ficam só com você até serem publicados.</i></span></div>
+      <div class="shelf">
+        <button type="button" class="new-card" data-act="new-book"><span><b>+</b><span>Novo livro</span></span></button>
+        ${cards}
+      </div>
+    </div>`;
+  }
+
+  function howtoView() {
+    const demo = {
+      id: 'demo', title: 'Bolo de Cenoura', meta: [{ k: 'Forno', v: '180 °C' }, { k: 'Tempo', v: '40 min' }],
+      sections: [{ id: 'd', label: '', pre: 'Untar uma forma\nPreaquecer o forno a 180 °C', ings: [
+        { id: 'a', q: '3', name: 'ovos' }, { id: 'b', q: '1 xícara', name: 'de azeite' }, { id: 'c', q: '1 xícara', name: 'de açúcar' }, { id: 'd2', q: '2', name: 'cenouras médias' },
+        { id: 'e', q: '2 xícaras', name: 'de farinha, peneirada' }, { id: 'f', q: '1 xícara', name: 'de água morna' }, { id: 'g', q: '1 colher de sopa', name: 'de fermento' }],
+        steps: [
+          { id: 's1', op: 'bater no liquidificador', t: '', inputs: ['a', 'b', 'c', 'd2'] },
+          { id: 's2', op: 'dobrar aos poucos', t: '', inputs: ['s1', 'e'] },
+          { id: 's3', op: 'misturar', t: '', inputs: ['s2', 'f', 'g'] },
+          { id: 's4', op: 'assar', t: '180 °C · 40 min', inputs: ['s3'] }] }],
+      notes: '', tips: '',
+    };
+    return `<div class="reader">
+      <section class="page">
+        <div class="rec-head"><div class="eb"><span>Como funciona</span><span>Exemplo</span></div><h3>O cartão algorítmico</h3></div>
+        <p>Cada receita vira uma tabela que se lê da esquerda para a direita. Os ingredientes ficam na primeira coluna, na ordem em que entram. Cada coluna seguinte é uma operação, e ela abraça na vertical tudo o que junta. A área hachurada é espera: aquele ingrediente só entra mais à direita. A coluna preta é o passo final.</p>
+        ${sectionHtml(demo.sections[0], { showWarnings: false })}
+      </section>
+      <section class="page">
+        <div class="rec-head"><div class="eb"><span>No formulário</span><span></span></div><h3>Três campos, nada de desenhar tabela</h3></div>
+        <ol>
+          <li><b>Ingredientes.</b> Quantidade e nome, um por linha.</li>
+          <li><b>Passos.</b> Escreva a operação (“bater”, “dobrar”, “assar”) e toque nos ingredientes e resultados que ela junta. O resultado do passo anterior já vem marcado.</li>
+          <li><b>Detalhes.</b> Temperatura e tempo vão no campo do passo; preparativos como “untar a forma” vão no topo.</li>
+        </ol>
+        <p>A tabela se monta sozinha ao lado, enquanto você escreve. Receitas com partes, como massa e recheio, ganham um cartão por parte, e uma parte pode usar o preparo de outra.</p>
+        <p>Um livro tem capítulos, e cada capítulo agrupa receitas por tema. Quando estiver pronto, marque <i>Publicar na estante</i>.</p>
+        ${S.canWrite ? '<p><button type="button" class="btn solid" data-act="new-book">Começar um livro</button></p>' : ''}
+      </section>
+    </div>`;
+  }
+
+  function bookView() {
+    const { data: b, owner, src } = S.book;
+    const mine = src !== 'destaque' && (S.offline || owner === S.uid);
+    return `<div class="reader">
+      <div class="toolbar">
+        <div class="grp"><button type="button" class="btn small" data-nav="${mine ? 'mine' : 'shelf'}">← ${mine ? 'Meus livros' : 'Estante'}</button></div>
+        <div class="grp">
+          <button type="button" class="btn small" data-act="download-book">Baixar HTML</button>
+          ${mine ? '<button type="button" class="btn small solid" data-act="edit-book">Editar livro</button>' : ''}
+        </div>
+      </div>
+      ${bookPagesHtml(b)}
+    </div>`;
+  }
+
+  // ------------------------------------------------------------ editor do livro
+  function editBookView() {
+    const b = S.edit;
+    const themeOpts = (sel) => b.themes.map((t) => `<option value="${t.id}"${t.id === sel ? ' selected' : ''}>${esc(t.name || 'Sem nome')}</option>`).join('');
+    const themes = b.themes.map((t, ti) => `
+      <div class="theme-block">
+        <div class="theme-row">
+          <label class="f"><span>Capítulo ${roman(ti + 1)}</span><input type="text" id="th-${t.id}-name" data-bk="themes.${ti}.name" value="${esc(t.name)}" placeholder="Bolos, Massas, Domingo em família…"></label>
+          <div style="display:flex;gap:6px">
+            <button type="button" class="icon-btn" title="Subir capítulo" aria-label="Subir capítulo" data-act="theme-up" data-i="${ti}" ${ti === 0 ? 'disabled' : ''}>↑</button>
+            <button type="button" class="icon-btn" title="Descer capítulo" aria-label="Descer capítulo" data-act="theme-down" data-i="${ti}" ${ti === b.themes.length - 1 ? 'disabled' : ''}>↓</button>
+            <button type="button" class="icon-btn del" title="Excluir capítulo" aria-label="Excluir capítulo" data-act="theme-del" data-i="${ti}">×</button>
+          </div>
+        </div>
+        <label class="f"><span>Abertura do capítulo</span><input type="text" id="th-${t.id}-lede" data-bk="themes.${ti}.lede" value="${esc(t.lede)}" placeholder="Uma frase que apresenta o tema"></label>
+        <ul class="rec-list">
+          ${t.recipes.map((r, ri) => `
+            <li>
+              <span class="nm">${esc(r.title || 'Receita sem título')}</span>
+              <span class="acts">
+                <button type="button" class="icon-btn" aria-label="Subir receita" data-act="rec-up" data-t="${ti}" data-r="${ri}" ${ri === 0 ? 'disabled' : ''}>↑</button>
+                <button type="button" class="icon-btn" aria-label="Descer receita" data-act="rec-down" data-t="${ti}" data-r="${ri}" ${ri === t.recipes.length - 1 ? 'disabled' : ''}>↓</button>
+                ${b.themes.length > 1 ? `<select id="mv-${r.id}" aria-label="Mover para capítulo" data-act-change="rec-move" data-t="${ti}" data-r="${ri}">${themeOpts(t.id)}</select>` : ''}
+                <button type="button" class="btn small" data-act="rec-edit" data-t="${ti}" data-r="${ri}">Editar</button>
+                <button type="button" class="icon-btn del" aria-label="Excluir receita" data-act="rec-del" data-t="${ti}" data-r="${ri}">×</button>
+              </span>
+            </li>`).join('')}
+        </ul>
+        <div><button type="button" class="btn small" data-act="rec-new" data-t="${ti}">+ Receita neste capítulo</button></div>
+      </div>`).join('');
+    return `<div class="editor">
+      <div class="ed-head"><h2>Editar livro</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn small" data-act="view-book">Ver como livro</button><button type="button" class="btn small red" data-act="book-del">Excluir livro</button></div></div>
+      <div class="panel">
+        <h3>Folha de rosto</h3>
+        <div class="grid2">
+          <label class="f"><span>Título</span><input type="text" id="bk-title" data-bk="title" value="${esc(b.title)}"></label>
+          <label class="f"><span>Subtítulo</span><input type="text" id="bk-sub" data-bk="subtitle" value="${esc(b.subtitle)}" placeholder="Receitas da avó, revistas e testadas"></label>
+          <label class="f"><span>Autoria, como sai na capa</span><input type="text" id="bk-by" data-bk="byline" value="${esc(b.byline)}" placeholder="Seu nome"></label>
+          <label class="f"><span>Cor da capa</span><select id="bk-cloth" data-bk="cloth">${CLOTHS.map((c, i) => `<option value="${c}"${c === b.cloth ? ' selected' : ''}>${['Vinho', 'Azul-marinho', 'Verde-garrafa', 'Couro', 'Ameixa', 'Grafite', 'Mostarda'][i]}</option>`).join('')}</select></label>
+        </div>
+        <label class="f"><span>Apresentação</span><textarea id="bk-intro" data-bk="intro" rows="3" placeholder="Um parágrafo de abertura para o livro">${esc(b.intro)}</textarea></label>
+        <label class="check"><input type="checkbox" id="bk-pub" data-bk-check="published" ${b.published ? 'checked' : ''}> Publicar na estante</label>
+      </div>
+      <div class="panel">
+        <h3>Capítulos e receitas <button type="button" class="btn small" data-act="theme-new">+ Capítulo</button></h3>
+        ${themes || '<p class="hint">Crie um capítulo para começar.</p>'}
+      </div>
+      ${savebarHtml()}
+    </div>`;
+  }
+
+  const savebarHtml = () => `<div class="savebar" id="savebar"><span class="st" id="save-st">${esc(S.status || (S.dirty ? 'Alterações não salvas' : 'Tudo salvo'))}</span>
+    <span style="display:flex;gap:8px;flex-wrap:wrap">${S.view === 'editRecipe' ? '<button type="button" class="btn small" data-act="rec-back">← Voltar ao livro</button>' : ''}<button type="button" class="btn small solid" data-act="save" ${S.saving ? 'disabled' : ''}>Salvar</button></span></div>`;
+  function paintSavebar() {
+    const el = document.getElementById('save-st'); if (!el) return;
+    el.textContent = S.status || (S.dirty ? 'Alterações não salvas' : 'Tudo salvo');
+    const b = document.querySelector('[data-act="save"]'); if (b) b.disabled = S.saving;
+  }
+  function markDirty() { S.dirty = true; S.status = ''; confirmLeave = false; paintSavebar(); }
+
+  // ------------------------------------------------------------ editor da receita
+  function editRecipeView() {
+    const { recipe: r, themeId } = S.recEdit;
+    const b = S.edit;
+    const secs = r.sections.map((s, si) => sectionEditor(s, si, r.sections.length)).join('');
+    return `<div class="editor">
+      <div class="ed-head"><h2>${r.title ? esc(r.title) : 'Nova receita'}</h2></div>
+      <div class="rec-editor">
+        <div class="editor">
+          <div class="panel">
+            <h3>Receita</h3>
+            <div class="grid2">
+              <label class="f"><span>Nome</span><input type="text" id="r-title" data-rc="title" value="${esc(r.title)}" placeholder="Bolo de cenoura"></label>
+              <label class="f"><span>Capítulo</span><select id="r-theme" data-act-change="rec-theme">${b.themes.map((t) => `<option value="${t.id}"${t.id === themeId ? ' selected' : ''}>${esc(t.name || 'Sem nome')}</option>`).join('')}</select></label>
+            </div>
+            <div class="rows" id="meta-rows">
+              ${r.meta.map((m, mi) => `<div class="meta-row">
+                <input type="text" id="m-${mi}-k" data-rc="meta.${mi}.k" value="${esc(m.k)}" aria-label="Rótulo" placeholder="Rótulo">
+                <input type="text" id="m-${mi}-v" data-rc="meta.${mi}.v" value="${esc(m.v)}" aria-label="Valor" placeholder="${['180 °C', '40 min', '12 fatias'][mi] || 'valor'}">
+                <button type="button" class="icon-btn del" aria-label="Remover linha" data-act="meta-del" data-i="${mi}">×</button></div>`).join('')}
+            </div>
+            <div><button type="button" class="btn small" data-act="meta-new">+ Dado da receita</button></div>
+          </div>
+          ${secs}
+          <div><button type="button" class="btn small" data-act="sec-new">+ Parte da receita (massa, recheio, cobertura…)</button></div>
+          <div class="panel">
+            <h3>Notas</h3>
+            <label class="f"><span>Observações, uma por linha</span><textarea id="r-notes" data-rc="notes" rows="3" placeholder="Tirar do fogo por 5 s a cada 30 s, sem parar de bater.">${esc(r.notes)}</textarea></label>
+            <label class="f"><span>Dicas, uma por linha</span><textarea id="r-tips" data-rc="tips" rows="3" placeholder="Servir com sorvete de creme.">${esc(r.tips)}</textarea></label>
+          </div>
+        </div>
+        <aside class="preview" aria-label="Prévia">
+          <div class="preview-label">Prévia da página</div>
+          <div class="page" id="preview"></div>
+        </aside>
+      </div>
+      ${savebarHtml()}
+    </div>`;
+  }
+
+  function sectionEditor(s, si, n) {
+    const multi = n > 1;
+    return `<div class="panel" id="sec-${s.id}">
+      <h3>${multi ? `Parte ${si + 1}` : 'Cartão'}${multi ? `<button type="button" class="btn small red" data-act="sec-del" data-s="${si}">Remover parte</button>` : ''}</h3>
+      ${multi ? `<label class="f"><span>Nome da parte</span><input type="text" id="s-${s.id}-label" data-rc="sections.${si}.label" value="${esc(s.label)}" placeholder="Massa, Recheio, Montagem…"></label>` : ''}
+      <label class="f"><span>Preparativos, um por linha</span><textarea id="s-${s.id}-pre" data-rc="sections.${si}.pre" rows="2" placeholder="Untar uma forma&#10;Preaquecer o forno a 180 °C">${esc(s.pre)}</textarea></label>
+      <div class="f"><span class="chips-label">Ingredientes, na ordem em que entram</span></div>
+      <div class="rows" id="ings-${s.id}">${ingRows(s, si)}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" class="btn small" data-act="ing-new" data-s="${si}">+ Ingrediente</button>
+        ${multi ? `<button type="button" class="btn small" data-act="ing-ref" data-s="${si}">+ Usar o preparo de outra parte</button>` : ''}
+      </div>
+      <div class="f"><span class="chips-label">Passos</span></div>
+      <div class="rows" id="steps-${s.id}">${stepRows(s, si)}</div>
+      <div><button type="button" class="btn small solid" data-act="step-new" data-s="${si}">+ Passo</button></div>
+    </div>`;
+  }
+
+  function ingRows(s, si) {
+    return s.ings.map((g, gi) => `<div class="ing-row">
+      <input type="text" class="qn" id="g-${g.id}-q" data-rc="sections.${si}.ings.${gi}.q" value="${esc(g.q)}" aria-label="Quantidade" placeholder="${g.ref ? '' : '2 xícaras'}" ${g.ref ? 'disabled' : ''}>
+      <input type="text" id="g-${g.id}-n" data-rc="sections.${si}.ings.${gi}.name" data-refresh="${si}" value="${esc(g.name)}" aria-label="Ingrediente" placeholder="${g.ref ? 'recheio, 1 disco de massa…' : 'de farinha de trigo'}">
+      <label class="check refc" title="Marca como preparo vindo de outra parte"><input type="checkbox" id="g-${g.id}-ref" data-rc-check="sections.${si}.ings.${gi}.ref" ${g.ref ? 'checked' : ''}>preparo</label>
+      <button type="button" class="icon-btn" aria-label="Subir ingrediente" data-act="ing-up" data-s="${si}" data-g="${gi}" ${gi === 0 ? 'disabled' : ''}>↑</button>
+      <button type="button" class="icon-btn" aria-label="Descer ingrediente" data-act="ing-down" data-s="${si}" data-g="${gi}" ${gi === s.ings.length - 1 ? 'disabled' : ''}>↓</button>
+      <button type="button" class="icon-btn del" aria-label="Remover ingrediente" data-act="ing-del" data-s="${si}" data-g="${gi}">×</button>
+    </div>`).join('');
+  }
+
+  function stepRows(s, si) {
+    if (!s.steps.length) return '<p class="hint">Nenhum passo ainda. Crie o primeiro e marque os ingredientes que ele junta.</p>';
+    const consumer = new Map();
+    s.steps.forEach((st, k) => st.inputs.forEach((x) => consumer.set(x, k)));
+    return s.steps.map((st, k) => {
+      const chips = [];
+      s.steps.slice(0, k).forEach((p, j) => {
+        const sel = st.inputs.includes(p.id); const usedBy = consumer.get(p.id);
+        const busy = !sel && usedBy !== undefined && usedBy !== k;
+        chips.push(`<button type="button" class="chip res" aria-pressed="${sel}" ${busy ? `disabled title="Já usado no passo ${usedBy + 1}"` : ''} data-act="chip" data-s="${si}" data-k="${k}" data-x="${p.id}">↳ ${j + 1}. ${esc(p.op || 'passo')}</button>`);
+      });
+      s.ings.forEach((g) => {
+        if (!(g.name || g.q || '').trim()) return;
+        const sel = st.inputs.includes(g.id); const usedBy = consumer.get(g.id);
+        const busy = !sel && usedBy !== undefined && usedBy !== k;
+        chips.push(`<button type="button" class="chip" aria-pressed="${sel}" ${busy ? `disabled title="Já usado no passo ${usedBy + 1}"` : ''} data-act="chip" data-s="${si}" data-k="${k}" data-x="${g.id}">${esc(g.ref ? g.name : (g.name || g.q).replace(/^de\s+/i, ''))}</button>`);
+      });
+      return `<div class="step">
+        <div class="step-top"><span class="sn">Passo ${k + 1}</span><span class="sp"></span>
+          <button type="button" class="icon-btn" aria-label="Subir passo" data-act="step-up" data-s="${si}" data-k="${k}" ${k === 0 ? 'disabled' : ''}>↑</button>
+          <button type="button" class="icon-btn" aria-label="Descer passo" data-act="step-down" data-s="${si}" data-k="${k}" ${k === s.steps.length - 1 ? 'disabled' : ''}>↓</button>
+          <button type="button" class="icon-btn del" aria-label="Remover passo" data-act="step-del" data-s="${si}" data-k="${k}">×</button></div>
+        <div class="grid2">
+          <label class="f"><span>Operação</span><input type="text" id="st-${st.id}-op" data-rc="sections.${si}.steps.${k}.op" data-refresh-steps="${si}" value="${esc(st.op)}" placeholder="bater, dobrar, assar…"></label>
+          <label class="f"><span>Tempo, temperatura</span><input type="text" id="st-${st.id}-t" data-rc="sections.${si}.steps.${k}.t" value="${esc(st.t)}" placeholder="180 °C · 40 min"></label>
+        </div>
+        <div class="chips-label">Junta</div>
+        <div class="chips">${chips.join('') || '<span class="hint">Adicione ingredientes acima.</span>'}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function paintPreview() {
+    const el = document.getElementById('preview'); if (!el || !S.recEdit) return;
+    const t = S.edit.themes.find((x) => x.id === S.recEdit.themeId);
+    el.innerHTML = recipeHtml(S.recEdit.recipe, { themeName: t?.name, showWarnings: true });
+  }
+  let pvTimer = 0;
+  const schedulePreview = () => { clearTimeout(pvTimer); pvTimer = setTimeout(paintPreview, 120); };
+  const repaintSteps = (si) => {
+    const s = S.recEdit.recipe.sections[si];
+    const el = document.getElementById(`steps-${s.id}`); if (el) el.innerHTML = stepRows(s, si);
+  };
+  const repaintIngs = (si) => {
+    const s = S.recEdit.recipe.sections[si];
+    const el = document.getElementById(`ings-${s.id}`); if (el) el.innerHTML = ingRows(s, si);
+  };
+  // passos só podem usar passos anteriores
+  function sanitize(s) {
+    const ingIds = new Set(s.ings.map((g) => g.id));
+    s.steps.forEach((st, k) => {
+      const earlier = new Set(s.steps.slice(0, k).map((x) => x.id));
+      st.inputs = st.inputs.filter((x) => ingIds.has(x) || earlier.has(x));
+    });
+    const seen = new Set();
+    s.steps.forEach((st) => { st.inputs = st.inputs.filter((x) => (seen.has(x) ? false : (seen.add(x), true))); });
+  }
+
+  // grava a receita em edição no livro
+  function commitRecipe() {
+    const { recipe, themeId, origThemeId } = S.recEdit;
+    const b = S.edit;
+    const from = b.themes.find((t) => t.id === origThemeId);
+    if (from) {
+      const i = from.recipes.findIndex((x) => x.id === recipe.id);
+      if (themeId === origThemeId && i >= 0) { from.recipes[i] = clone(recipe); return; }
+      if (i >= 0) from.recipes.splice(i, 1);
+    }
+    const to = b.themes.find((t) => t.id === themeId) || b.themes[0];
+    to.recipes.push(clone(recipe));
+    S.recEdit.origThemeId = to.id;
+  }
+
+  // ------------------------------------------------------------ campos
+  const setPath = (obj, path, val) => { const p = path.split('.'); let o = obj; for (let i = 0; i < p.length - 1; i++) o = o[p[i]]; o[p.at(-1)] = val; };
+
+  app.addEventListener('input', (ev) => {
+    const t = ev.target;
+    if (t.dataset.bk) { setPath(S.edit, t.dataset.bk, t.value); markDirty(); return; }
+    if (t.dataset.rc && S.recEdit) {
+      setPath(S.recEdit.recipe, t.dataset.rc, t.value); markDirty(); schedulePreview();
+      if (t.dataset.refresh !== undefined) { clearTimeout(t._rt); t._rt = setTimeout(() => repaintSteps(+t.dataset.refresh), 250); }
+      if (t.dataset.refreshSteps !== undefined) {
+        const si = +t.dataset.refreshSteps; clearTimeout(t._rt);
+        t._rt = setTimeout(() => {
+          const s = S.recEdit.recipe.sections[si];
+          document.querySelectorAll(`#steps-${s.id} .chip.res`).forEach((c) => { const j = s.steps.findIndex((x) => x.id === c.dataset.x); if (j >= 0) c.textContent = `↳ ${j + 1}. ${s.steps[j].op || 'passo'}`; });
+        }, 250);
+      }
+      if (t.id === 'r-title') { const h = document.querySelector('.ed-head h2'); if (h) h.textContent = t.value || 'Nova receita'; }
+    }
+  });
+  app.addEventListener('change', (ev) => {
+    const t = ev.target;
+    if (t.dataset.bkCheck) { S.edit[t.dataset.bkCheck] = t.checked; markDirty(); return; }
+    if (t.dataset.bk && t.tagName === 'SELECT') { setPath(S.edit, t.dataset.bk, t.value); markDirty(); return; }
+    if (t.dataset.rcCheck) {
+      setPath(S.recEdit.recipe, t.dataset.rcCheck, t.checked); markDirty();
+      const si = +t.dataset.rcCheck.split('.')[1]; repaintIngs(si); repaintSteps(si); paintPreview(); return;
+    }
+    const a = t.dataset.actChange;
+    if (a === 'rec-move') {
+      const ti = +t.dataset.t, ri = +t.dataset.r;
+      const [r] = S.edit.themes[ti].recipes.splice(ri, 1);
+      S.edit.themes.find((x) => x.id === t.value).recipes.push(r); markDirty(); render();
+    }
+    if (a === 'rec-theme') { S.recEdit.themeId = t.value; markDirty(); paintPreview(); }
+  });
+
+  // ------------------------------------------------------------ ações
+  const move = (arr, i, d) => { const j = i + d; if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; };
+  function twoStep(el, label) {
+    if (el.dataset.armed) return true;
+    el.dataset.armed = '1'; const old = el.innerHTML; el.classList.add('confirm-del'); el.textContent = label;
+    setTimeout(() => { if (el.isConnected) { delete el.dataset.armed; el.innerHTML = old; el.classList.remove('confirm-del'); } }, 3500);
+    return false;
+  }
+
+  async function handleAct(a, el) {
+    const b = S.edit, R = S.recEdit?.recipe;
+    const si = +el.dataset.s, k = +el.dataset.k, gi = +el.dataset.g;
+    switch (a) {
+      case 'new-book': {
+        if (!S.canWrite) return;
+        S.edit = newBook(); S.dirty = true; S.status = ''; go('editBook'); return;
+      }
+      case 'edit-book': S.edit = clone(S.book.data); S.dirty = false; S.status = ''; go('editBook'); return;
+      case 'view-book': {
+        if (S.dirty) { await saveBook(); if (S.dirty) return; }
+        S.book = { src: S.offline ? 'local' : 'shelf', owner: S.uid, id: b.id, data: clone(b) }; S.edit = null; go('book'); return;
+      }
+      case 'book-del': if (twoStep(el, 'Confirmar exclusão')) await deleteBook(b.id); return;
+      case 'save': if (S.view === 'editRecipe') commitRecipe(); await saveBook(); return;
+      case 'theme-new': b.themes.push({ id: rid(), name: '', lede: '', recipes: [] }); markDirty(); render(); document.getElementById(`th-${b.themes.at(-1).id}-name`)?.focus(); return;
+      case 'theme-up': move(b.themes, +el.dataset.i, -1); markDirty(); render(); return;
+      case 'theme-down': move(b.themes, +el.dataset.i, 1); markDirty(); render(); return;
+      case 'theme-del': {
+        const t = b.themes[+el.dataset.i];
+        if (t.recipes.length && !twoStep(el, '!')) return;
+        b.themes.splice(+el.dataset.i, 1); if (!b.themes.length) b.themes.push({ id: rid(), name: 'Capítulo', lede: '', recipes: [] }); markDirty(); render(); return;
+      }
+      case 'rec-up': move(b.themes[+el.dataset.t].recipes, +el.dataset.r, -1); markDirty(); render(); return;
+      case 'rec-down': move(b.themes[+el.dataset.t].recipes, +el.dataset.r, 1); markDirty(); render(); return;
+      case 'rec-del': if (twoStep(el, '!')) { b.themes[+el.dataset.t].recipes.splice(+el.dataset.r, 1); markDirty(); render(); } return;
+      case 'rec-new': {
+        const t = b.themes[+el.dataset.t];
+        S.recEdit = { themeId: t.id, origThemeId: null, recipe: newRecipe() }; markDirty(); go('editRecipe');
+        document.getElementById('r-title')?.focus(); return;
+      }
+      case 'rec-edit': {
+        const t = b.themes[+el.dataset.t];
+        S.recEdit = { themeId: t.id, origThemeId: t.id, recipe: clone(t.recipes[+el.dataset.r]) }; go('editRecipe'); return;
+      }
+      case 'rec-back': {
+        const blank = !R.title.trim() && !R.sections.some((s) => s.steps.length || s.ings.some((g) => (g.name || g.q).trim()));
+        if (!(blank && !S.recEdit.origThemeId)) commitRecipe();
+        S.recEdit = null; go('editBook'); return;
+      }
+      case 'meta-new': R.meta.push({ k: '', v: '' }); markDirty(); render(); return;
+      case 'meta-del': R.meta.splice(+el.dataset.i, 1); markDirty(); render(); return;
+      case 'sec-new': {
+        if (R.sections.length === 1 && !R.sections[0].label) R.sections[0].label = 'Parte 1';
+        R.sections.push(newSection(`Parte ${R.sections.length + 1}`)); markDirty(); render();
+        document.getElementById(`s-${R.sections.at(-1).id}-label`)?.focus(); return;
+      }
+      case 'sec-del': if (twoStep(el, 'Confirmar')) { R.sections.splice(si, 1); markDirty(); render(); } return;
+      case 'ing-new': case 'ing-ref': {
+        const s = R.sections[si]; s.ings.push({ id: rid(), q: '', name: '', ref: a === 'ing-ref' }); markDirty(); repaintIngs(si);
+        document.getElementById(`g-${s.ings.at(-1).id}-${a === 'ing-ref' ? 'n' : 'q'}`)?.focus(); return;
+      }
+      case 'ing-up': move(R.sections[si].ings, gi, -1); markDirty(); repaintIngs(si); repaintSteps(si); paintPreview(); return;
+      case 'ing-down': move(R.sections[si].ings, gi, 1); markDirty(); repaintIngs(si); repaintSteps(si); paintPreview(); return;
+      case 'ing-del': {
+        const s = R.sections[si]; const [g] = s.ings.splice(gi, 1);
+        s.steps.forEach((st) => { st.inputs = st.inputs.filter((x) => x !== g.id); });
+        if (!s.ings.length) s.ings.push({ id: rid(), q: '', name: '', ref: false });
+        markDirty(); repaintIngs(si); repaintSteps(si); paintPreview(); return;
+      }
+      case 'step-new': {
+        const s = R.sections[si];
+        const used = new Set(s.steps.flatMap((x) => x.inputs));
+        const prev = s.steps.at(-1);
+        s.steps.push({ id: rid(), op: '', t: '', inputs: prev && !used.has(prev.id) ? [prev.id] : [] });
+        markDirty(); repaintSteps(si); paintPreview();
+        document.getElementById(`st-${s.steps.at(-1).id}-op`)?.focus(); return;
+      }
+      case 'step-up': case 'step-down': {
+        const s = R.sections[si]; move(s.steps, k, a === 'step-up' ? -1 : 1); sanitize(s); markDirty(); repaintSteps(si); paintPreview(); return;
+      }
+      case 'step-del': {
+        const s = R.sections[si]; const [st] = s.steps.splice(k, 1);
+        s.steps.forEach((x) => { x.inputs = x.inputs.filter((y) => y !== st.id); });
+        markDirty(); repaintSteps(si); paintPreview(); return;
+      }
+      case 'chip': {
+        const s = R.sections[si]; const st = s.steps[k]; const x = el.dataset.x;
+        st.inputs = st.inputs.includes(x) ? st.inputs.filter((y) => y !== x) : [...st.inputs, x];
+        markDirty(); repaintSteps(si); paintPreview();
+        document.querySelector(`#steps-${s.id} [data-k="${k}"][data-x="${x}"]`)?.focus(); return;
+      }
+      case 'download-book': return downloadBook(el);
+    }
+  }
+
+  // ------------------------------------------------------------ exportação
+  async function downloadBook(btn) {
+    const b = S.book.data;
+    const css = document.querySelector('style').textContent;
+    const fonts = document.querySelector('link[rel=stylesheet]').outerHTML;
+    const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(b.title)}</title>${fonts}<style>${css}</style></head><body><main class="reader" style="padding:32px 0">${bookPagesHtml(b, { linkable: false })}</main></body></html>`;
+    const name = (b.title || 'livro').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase() || 'livro';
+    let dl = null; try { dl = await window.claude?.use?.('downloads'); } catch (e) { dl = null; }
+    const label = btn.textContent;
+    if (!dl) { btn.textContent = 'Download indisponível aqui'; setTimeout(() => { btn.textContent = label; }, 2500); return; }
+    try { await dl.save({ filename: `${name}.html`, data: html }); btn.textContent = 'Arquivo enviado'; }
+    catch (e) { btn.textContent = 'Download cancelado'; }
+    setTimeout(() => { btn.textContent = label; }, 2500);
+  }
+
+  init();
+})();
+</script>
