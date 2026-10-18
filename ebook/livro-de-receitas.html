@@ -4,16 +4,20 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: um livro de folhas empilhadas sobre a mesa; cada receita abre uma folha nova (e uma página nova no PDF). */
+/* Layout: folhas de caderno empilhadas; cada receita é um cartão algorítmico (ingredientes à esquerda,
+   operações em colunas que abraçam o que combinam), lido da esquerda para a direita. */
 :root {
-  --brand-primary: #17181C;
   --brand-ink: #17181C;
   --brand-background: #EFF0F2;
   --brand-accent: #7C1B0F;
   --brand-muted: #686B72;
   --paper: #FBFBFC;
-  --rule: #D9DBE0;
+  --rule: #C9CCD2;
+  --grid: #17181C;
   --tint: #F4E9E6;
+  --pre: #E6E8EC;
+  --fill: #F3F4F6;
+  --on-accent: #FBFBFC;
   --shadow: 0 1px 2px rgba(23,24,28,.06), 0 12px 32px rgba(23,24,28,.08);
   --font-heading: 'Fraunces', 'Iowan Old Style', Georgia, serif;
   --font-body: 'Geist', 'Helvetica Neue', Arial, sans-serif;
@@ -21,15 +25,15 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --brand-ink: #ECEDF0; --brand-background: #101114; --brand-accent: #E07A66;
-    --brand-muted: #9A9DA5; --paper: #1A1C21; --rule: #2E3138; --tint: #2A1D1B;
+    --brand-ink: #ECEDF0; --brand-background: #101114; --brand-accent: #E07A66; --brand-muted: #9A9DA5;
+    --paper: #1A1C21; --rule: #3A3D45; --grid: #C9CCD2; --tint: #2A1D1B; --pre: #24272D; --fill: #1F2126; --on-accent: #17181C;
     --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px rgba(0,0,0,.35);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --brand-ink: #ECEDF0; --brand-background: #101114; --brand-accent: #E07A66;
-  --brand-muted: #9A9DA5; --paper: #1A1C21; --rule: #2E3138; --tint: #2A1D1B;
+  --brand-ink: #ECEDF0; --brand-background: #101114; --brand-accent: #E07A66; --brand-muted: #9A9DA5;
+  --paper: #1A1C21; --rule: #3A3D45; --grid: #C9CCD2; --tint: #2A1D1B; --pre: #24272D; --fill: #1F2126; --on-accent: #17181C;
   --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px rgba(0,0,0,.35);
   color-scheme: dark;
 }
@@ -38,201 +42,148 @@
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 body {
-  background: var(--brand-background);
-  color: var(--brand-ink);
-  font-family: var(--font-body);
-  font-size: 16px;
-  line-height: 1.6;
+  background: var(--brand-background); color: var(--brand-ink);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.6;
   padding-block: 32px 64px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  overflow-wrap: break-word;
-  hyphens: auto;
+  overflow-wrap: break-word; hyphens: auto;
 }
 a { color: inherit; }
 a:focus-visible { outline: 2px solid var(--brand-accent); outline-offset: 3px; border-radius: 2px; }
 
-.book { display: grid; gap: 32px; max-width: 760px; margin: 0 auto; }
-.sheet {
-  background: var(--paper);
-  box-shadow: var(--shadow);
-  padding: clamp(28px, 6vw, 64px) clamp(20px, 6vw, 64px);
-  min-width: 0;
-  position: relative;
-}
+.book { display: grid; gap: 32px; max-width: 860px; margin: 0 auto; }
+.sheet { background: var(--paper); box-shadow: var(--shadow); padding: clamp(24px, 6vw, 60px) clamp(18px, 5.5vw, 60px); min-width: 0; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--brand-muted); }
 
-/* ---------- capa ---------- */
-.cover { display: grid; gap: 56px; min-height: min(1000px, 140vw); align-content: space-between; }
-.eyebrow {
-  font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--brand-muted);
-}
-.cover h1 {
-  font-family: var(--font-heading);
-  font-variation-settings: 'opsz' 144;
-  font-weight: 340;
-  font-size: clamp(56px, 14vw, 120px);
-  line-height: .92;
-  letter-spacing: -.02em;
-  margin: 0;
-  text-wrap: balance;
-}
+/* capa */
+.cover { display: grid; gap: 48px; align-content: space-between; }
+.cover h1 { font-family: var(--font-heading); font-variation-settings: 'opsz' 144; font-weight: 340; font-size: clamp(56px, 14vw, 124px); line-height: .92; letter-spacing: -.02em; margin: 0; text-wrap: balance; }
 .cover h1 em { font-style: italic; color: var(--brand-accent); font-weight: 300; }
-.cover-lede { font-size: 18px; max-width: 34ch; color: var(--brand-muted); margin: 20px 0 0; }
-.cover-index {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 0; border-top: 1px solid var(--brand-ink);
-  list-style: none; margin: 0; padding: 0;
-}
-.cover-index li {
-  border-bottom: 1px solid var(--rule); padding: 12px 0;
-  display: flex; gap: 12px; align-items: baseline; min-width: 0;
-  font-family: var(--font-heading); font-size: 18px;
-}
-.cover-index span { font-family: var(--font-mono); font-size: 12px; color: var(--brand-accent); }
+.cover-lede { font-size: 18px; max-width: 40ch; color: var(--brand-muted); margin: 20px 0 0; }
+.cover-demo { display: grid; gap: 10px; max-width: 520px; }
+.cover-demo .card td { font-size: 13px; }
+.cover-demo figcaption { font-size: 13px; color: var(--brand-muted); }
 .cover-foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 24px; }
 
-/* ---------- sumário ---------- */
-.toc h2, .part h2 {
-  font-family: var(--font-heading); font-weight: 400; font-size: 40px;
-  line-height: 1.1; margin: 8px 0 32px; text-wrap: balance;
-}
+/* sumário */
+.toc h2, .howto h2 { font-family: var(--font-heading); font-weight: 400; font-size: 40px; line-height: 1.1; margin: 8px 0 28px; text-wrap: balance; }
 .toc-part { margin-top: 28px; }
 .toc-part:first-of-type { margin-top: 0; }
-.toc-part h3 {
-  font-family: var(--font-mono); font-weight: 500; font-size: 12px; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--brand-accent); margin: 0 0 4px;
-}
+.toc-part h3 { font-family: var(--font-mono); font-weight: 500; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--brand-accent); margin: 0 0 4px; }
 .toc ol { list-style: none; margin: 0; padding: 0; }
-.toc li a {
-  display: grid; grid-template-columns: 2.5em 1fr auto; gap: 12px; align-items: baseline;
-  padding: 12px 0; border-bottom: 1px solid var(--rule); text-decoration: none;
-}
+.toc li a { display: grid; grid-template-columns: 2.5em minmax(0, 1fr) auto; gap: 12px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--rule); text-decoration: none; }
 .toc li a:hover .toc-name { color: var(--brand-accent); }
 .toc-num { font-family: var(--font-mono); font-size: 13px; color: var(--brand-muted); font-variant-numeric: tabular-nums; }
-.toc-name { font-family: var(--font-heading); font-size: 22px; line-height: 1.25; min-width: 0; transition: color .15s; }
-.toc-meta { font-family: var(--font-mono); font-size: 12px; color: var(--brand-muted); text-align: right; white-space: nowrap; }
+.toc-name { font-family: var(--font-heading); font-size: 22px; line-height: 1.25; transition: color .15s; }
+.toc-meta { font-family: var(--font-mono); font-size: 12px; color: var(--brand-muted); text-align: right; }
+@media (max-width: 480px) { .toc li a { grid-template-columns: 2em minmax(0, 1fr); } .toc-meta { grid-column: 2; text-align: left; } }
 
-/* ---------- divisória de parte ---------- */
-.part { display: grid; align-content: end; min-height: 320px; background: var(--brand-ink); color: var(--paper); }
+/* como ler */
+.howto ol { margin: 0; padding-left: 1.2em; display: grid; gap: 10px; max-width: 62ch; }
+.howto li::marker { font-family: var(--font-mono); color: var(--brand-accent); }
+
+/* parte */
+.part { display: grid; align-content: end; min-height: 300px; background: var(--brand-ink); color: var(--paper); }
 .part .eyebrow { color: var(--brand-accent); }
-.part h2 { font-size: clamp(44px, 10vw, 72px); font-style: italic; font-weight: 300; margin: 8px 0 12px; color: var(--paper); }
-.part p { margin: 0; max-width: 42ch; color: var(--paper); opacity: .72; }
+.part h2 { font-family: var(--font-heading); font-size: clamp(44px, 10vw, 72px); font-style: italic; font-weight: 300; line-height: 1; margin: 8px 0 12px; }
+.part p { margin: 0; max-width: 42ch; opacity: .72; }
 
-/* ---------- receita ---------- */
-.recipe-head { display: grid; gap: 16px; padding-bottom: 28px; border-bottom: 1px solid var(--brand-ink); }
+/* receita */
+.recipe-head { display: grid; gap: 16px; padding-bottom: 24px; }
 .recipe-head .eyebrow { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.recipe-head h2 {
-  font-family: var(--font-heading); font-variation-settings: 'opsz' 144;
-  font-weight: 360; font-size: clamp(40px, 9vw, 68px); line-height: 1; letter-spacing: -.015em;
-  margin: 0; text-wrap: balance;
-}
+.recipe-head h2 { font-family: var(--font-heading); font-variation-settings: 'opsz' 144; font-weight: 360; font-size: clamp(40px, 9vw, 68px); line-height: 1; letter-spacing: -.015em; margin: 0; text-wrap: balance; }
 .meta { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
-.meta li {
-  font-family: var(--font-mono); font-size: 12px; letter-spacing: .02em;
-  padding: 4px 10px; border: 1px solid var(--rule); border-radius: 999px;
-  font-variant-numeric: tabular-nums; white-space: nowrap;
-}
+.meta li { font-family: var(--font-mono); font-size: 12px; padding: 4px 10px; border: 1px solid var(--rule); border-radius: 999px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .meta li b { font-weight: 500; color: var(--brand-accent); margin-right: 4px; }
 
-.recipe-body {
-  display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  gap: 40px; padding-top: 32px;
-}
-@media (max-width: 640px) { .recipe-body { grid-template-columns: minmax(0, 1fr); gap: 32px; } }
+.cards { display: grid; gap: 28px; }
+.card-label { font-family: var(--font-heading); font-style: italic; font-weight: 400; font-size: 22px; color: var(--brand-accent); margin: 0 0 10px; }
 
-.recipe-body h3 {
-  font-family: var(--font-mono); font-size: 12px; font-weight: 500; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--brand-muted); margin: 0 0 12px;
-}
-.group { margin-top: 24px; break-inside: avoid; }
-.group:first-of-type { margin-top: 0; }
-.group h4 {
-  font-family: var(--font-heading); font-style: italic; font-weight: 400; font-size: 19px;
-  margin: 0 0 6px; color: var(--brand-accent);
-}
+/* o cartão algorítmico */
+.card-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.card { width: 100%; border-collapse: collapse; border: 2px solid var(--grid); table-layout: fixed; }
+.card col.c-ing { width: 34%; }
+@media (max-width: 700px) { .card { min-width: calc(12rem + var(--ops) * 5.5rem); } }
+.card td { border: 1px solid var(--grid); padding: 8px 10px; vertical-align: middle; font-size: 14.5px; line-height: 1.35; }
+.card td.ing { overflow-wrap: anywhere; }
+.card td.ing .q { font-family: var(--font-mono); font-size: 12.5px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.card td.ref { font-family: var(--font-heading); font-style: italic; color: var(--brand-accent); }
+.card td.pre { text-align: center; background: var(--pre); font-weight: 500; }
+.card td.op { text-align: center; font-size: 13.5px; padding: 8px 6px; hyphens: auto; overflow-wrap: break-word; }
+.card td.op .t { display: block; font-family: var(--font-mono); font-size: 12px; color: var(--brand-accent); margin-top: 4px; font-variant-numeric: tabular-nums; }
+.card td.op.final { background: var(--brand-accent); color: var(--on-accent); font-weight: 600; }
+.card td.op.final .t { color: var(--on-accent); font-weight: 400; }
+.card td.fill { background: var(--fill); }
+.card sup { font-family: var(--font-mono); font-size: 10px; color: var(--brand-accent); margin-left: 1px; }
+.card td.op.final sup { color: var(--on-accent); }
 
-ul.ing { list-style: none; margin: 0; padding: 0; }
-ul.ing li {
-  padding: 7px 0; border-bottom: 1px dotted var(--rule); font-size: 15px; line-height: 1.45;
-  break-inside: avoid;
-}
-ul.ing .q { font-family: var(--font-mono); font-size: 13.5px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.notes { margin: 20px 0 0; padding-left: 1.4em; font-size: 14px; color: var(--brand-muted); display: grid; gap: 4px; max-width: 70ch; }
+.notes li::marker { font-family: var(--font-mono); font-size: 11px; color: var(--brand-accent); }
 
-ol.steps { list-style: none; margin: 0; padding: 0; counter-reset: step; }
-ol.steps li {
-  counter-increment: step; display: grid; grid-template-columns: 2em minmax(0, 1fr); gap: 8px;
-  padding: 0 0 14px; font-size: 15.5px; line-height: 1.55; break-inside: avoid;
-}
-ol.steps li::before {
-  content: counter(step, decimal-leading-zero);
-  font-family: var(--font-mono); font-size: 12px; color: var(--brand-accent);
-  padding-top: 4px; font-variant-numeric: tabular-nums;
-}
-ol.steps li strong { font-weight: 600; }
-
-.tips {
-  margin-top: 36px; padding: 20px 24px; background: var(--tint);
-  break-inside: avoid;
-}
-.tips h3 { font-family: var(--font-heading); font-style: italic; font-weight: 400; font-size: 20px; margin: 0 0 8px; color: var(--brand-accent); letter-spacing: 0; text-transform: none; }
+.tips { margin-top: 28px; padding: 18px 22px; background: var(--tint); break-inside: avoid; }
+.tips h3 { font-family: var(--font-heading); font-style: italic; font-weight: 400; font-size: 20px; margin: 0 0 6px; color: var(--brand-accent); }
 .tips ul { margin: 0; padding-left: 1.1em; }
-.tips li { padding: 3px 0; font-size: 15px; }
+.tips li { padding: 2px 0; font-size: 15px; }
 
-.back {
-  display: inline-block; margin-top: 32px; font-family: var(--font-mono); font-size: 12px;
-  letter-spacing: .1em; text-transform: uppercase; color: var(--brand-muted); text-decoration: none;
-}
+.back { display: inline-block; margin-top: 28px; font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--brand-muted); text-decoration: none; }
 .back:hover { color: var(--brand-accent); }
 
-/* ---------- colofão ---------- */
-.colophon { text-align: left; display: grid; gap: 12px; }
-.colophon p { margin: 0; color: var(--brand-muted); font-size: 14px; max-width: 52ch; }
-.colophon .mark { font-family: var(--font-heading); font-style: italic; font-size: 28px; color: var(--brand-ink); }
+.colophon { display: grid; gap: 12px; }
+.colophon p { margin: 0; color: var(--brand-muted); font-size: 14px; max-width: 56ch; }
+.colophon .mark { font-family: var(--font-heading); font-style: italic; font-size: 28px; }
 
-/* ---------- impressão / PDF ---------- */
-@page { size: A5; margin: 14mm 13mm 16mm; }
+/* impressão / PDF */
+@page { size: A4; margin: 16mm 14mm 18mm; }
 @media print {
   :root { --paper: #fff; --brand-background: #fff; }
   body { padding: 0; background: #fff; font-size: 10.5pt; }
   .book { display: block; max-width: none; }
   .sheet { box-shadow: none; padding: 0; break-before: page; }
   .sheet:first-child { break-before: auto; }
-  .cover { min-height: 180mm; }
-  .part { min-height: 180mm; padding: 14mm; }
-  .recipe-body { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .part { min-height: 240mm; padding: 16mm; }
+  .card-wrap { overflow: visible; }
+  .card { min-width: 0 !important; }
+  .card td { font-size: 9.5pt; padding: 5px 7px; }
+  .card td.op { font-size: 9pt; padding: 5px 4px; }
+  .card tr, .card-block { break-inside: avoid; }
   .back { display: none; }
-  .toc li a, .recipe-head { break-inside: avoid; }
-  h2, h3, h4 { break-after: avoid; }
+  h2, h3 { break-after: avoid; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 </style>
 
-<main class="book">
-
-  <!-- CAPA -->
+<main class="book" lang="pt-BR">
   <section class="sheet cover" id="capa">
-    <div class="eyebrow">Caderno de cozinha · edição 01</div>
+    <div class="eyebrow">Caderno de cozinha · edição 02</div>
     <div>
       <h1>Receitas<br>do <em>Gabe</em></h1>
-      <p class="cover-lede">Sete receitas testadas em casa, de bolo de liquidificador a torta de maçã com massa trançada.</p>
+      <p class="cover-lede">Sete receitas testadas em casa, escritas como algoritmos: o que entra, em que ordem, e o que sai.</p>
     </div>
-    <ol class="cover-index">
-      <li><span>01</span>Bolo de Cenoura</li>
-      <li><span>02</span>Bolo de Chocolate</li>
-      <li><span>03</span>Brownie</li>
-      <li><span>04</span>Mousse de Chocolate</li>
-      <li><span>05</span>Petit Gâteau</li>
-      <li><span>06</span>Massa de Pizza</li>
-      <li><span>07</span>Torta de Maçã</li>
-    </ol>
+    <figure class="cover-demo" style="margin:0">
+      <div class="card-wrap"><table class="card" style="--ops:3"><colgroup><col class="c-ing"><col class="c-op"><col class="c-op"><col class="c-op"></colgroup><tr><td class="ing"><span class="q"></span> ovos</td><td class="op" rowspan="3">bater</td><td class="op" rowspan="4">dobrar</td><td class="op final" rowspan="5">assar</td></tr><tr><td class="ing"><span class="q"></span> azeite</td></tr><tr><td class="ing"><span class="q"></span> açúcar</td></tr><tr><td class="ing"><span class="q"></span> farinha</td><td class="fill"></td></tr><tr><td class="ing"><span class="q"></span> fermento</td><td class="fill" colspan="2"></td></tr></table></div>
+      <figcaption>Cada coluna é uma operação. Ela junta tudo o que abraça à esquerda.</figcaption>
+    </figure>
     <div class="cover-foot eyebrow"><span>Gabriel S. Kumlehn</span><span>Atta Studio · 2026</span></div>
   </section>
 
-  <!-- SUMÁRIO -->
+  <section class="sheet howto" id="como-ler">
+    <div class="eyebrow">Antes de começar</div>
+    <h2>Como ler os cartões</h2>
+    <ol>
+      <li>As faixas cinza no topo são preparativos: forma, forno, tigelas.</li>
+      <li>A coluna da esquerda lista os ingredientes, já na ordem em que entram.</li>
+      <li>Leia da esquerda para a direita. Cada célula é uma operação aplicada a todos os ingredientes que ela cobre na vertical.</li>
+      <li>Células sombreadas significam espera: aquele ingrediente só entra na próxima operação à direita.</li>
+      <li>A última coluna, em destaque, é o passo final. Temperaturas e tempos aparecem logo abaixo de cada operação.</li>
+      <li>Números sobrescritos remetem às notas logo abaixo do cartão.</li>
+    </ol>
+  </section>
+
   <section class="sheet toc" id="sumario">
     <div class="eyebrow">Sumário</div>
     <h2>O que tem aqui</h2>
-
+    
     <div class="toc-part">
       <h3>Parte I · Bolos</h3>
       <ol>
@@ -244,7 +195,7 @@ ol.steps li strong { font-weight: 600; }
       <h3>Parte II · Chocolate</h3>
       <ol>
         <li><a href="#brownie"><span class="toc-num">03</span><span class="toc-name">Brownie</span><span class="toc-meta">180 °C · 20–25 min</span></a></li>
-        <li><a href="#mousse-de-chocolate"><span class="toc-num">04</span><span class="toc-name">Mousse de Chocolate</span><span class="toc-meta">geladeira · 2 h</span></a></li>
+        <li><a href="#mousse-de-chocolate"><span class="toc-num">04</span><span class="toc-name">Mousse de Chocolate</span><span class="toc-meta">2 h</span></a></li>
         <li><a href="#petit-gateau"><span class="toc-num">05</span><span class="toc-name">Petit Gâteau</span><span class="toc-meta">200 °C · 10–15 min</span></a></li>
       </ol>
     </div>
@@ -257,406 +208,137 @@ ol.steps li strong { font-weight: 600; }
     </div>
   </section>
 
-  <!-- PARTE I -->
   <section class="sheet part" id="parte-bolos">
     <div class="eyebrow">Parte I</div>
     <h2>Bolos</h2>
     <p>Mesma base, dois sabores. Tudo começa no liquidificador e termina dobrado à mão.</p>
   </section>
-
-  <!-- 01 BOLO DE CENOURA -->
-  <article class="sheet" id="bolo-de-cenoura">
+  <article class="sheet recipe" id="bolo-de-cenoura">
     <header class="recipe-head">
       <div class="eyebrow"><span>Receita 01 / 07</span><span>Bolos</span></div>
       <h2>Bolo de Cenoura</h2>
-      <ul class="meta">
-        <li><b>Forno</b>180 °C</li>
-        <li><b>Tempo</b>40 min</li>
-        <li><b>Forma</b>untada</li>
-      </ul>
+      <ul class="meta"><li><b>Forno</b>180 °C</li><li><b>Tempo</b>40 min</li><li><b>Forma</b>untada</li></ul>
     </header>
-    <div class="recipe-body">
-      <section>
-        <h3>Ingredientes</h3>
-        <ul class="ing">
-          <li><span class="q">2 xícaras</span> de farinha</li>
-          <li><span class="q">1 xícara</span> de açúcar</li>
-          <li><span class="q">2</span> cenouras médias</li>
-          <li><span class="q">1 xícara</span> de azeite</li>
-          <li><span class="q">3</span> ovos</li>
-          <li><span class="q">1 xícara</span> de água morna</li>
-          <li><span class="q">1 colher de sopa</span> de fermento</li>
-        </ul>
-      </section>
-      <section>
-        <h3>Modo de preparo</h3>
-        <ol class="steps">
-          <li><span>Bater os ovos, o azeite, o açúcar e as cenouras no liquidificador.</span></li>
-          <li><span>Despejar em uma vasilha e acrescentar a farinha peneirada aos poucos, dobrando na massa.</span></li>
-          <li><span>Adicionar a água morna e o fermento, e misturar.</span></li>
-          <li><span>Colocar a massa em uma forma untada e assar por <strong>40 minutos</strong> em forno preaquecido a <strong>180 °C</strong>.</span></li>
-        </ol>
-      </section>
-    </div>
-    <aside class="tips">
-      <h3>Dicas</h3>
-      <ul>
-        <li>Substituir cerca de 30% do açúcar comum por mascavo.</li>
-        <li>Bater as claras em neve separadamente.</li>
-        <li>Adicionar ½ colher de sopa de vinagre depois de misturar o fermento.</li>
-      </ul>
-    </aside>
+    <div class="cards">
+      <section class="card-block">
+        
+        <div class="card-wrap"><table class="card" style="--ops:4"><colgroup><col class="c-ing"><col class="c-op"><col class="c-op"><col class="c-op"><col class="c-op"></colgroup><tr><td class="pre" colspan="5">Untar uma forma</td></tr><tr><td class="pre" colspan="5">Preaquecer o forno a 180 °C</td></tr><tr><td class="ing"><span class="q">3</span> ovos</td><td class="op" rowspan="4">bater no liquidificador</td><td class="op" rowspan="5">dobrar aos poucos</td><td class="op" rowspan="7">misturar</td><td class="op final" rowspan="7">assar<br><span class="t">180&nbsp;°C</span><span class="t">40&nbsp;min</span></td></tr><tr><td class="ing"><span class="q">1 xícara</span> de azeite</td></tr><tr><td class="ing"><span class="q">1 xícara</span> de açúcar</td></tr><tr><td class="ing"><span class="q">2</span> cenouras médias</td></tr><tr><td class="ing"><span class="q">2 xícaras</span> de farinha, peneirada</td><td class="fill"></td></tr><tr><td class="ing"><span class="q">1 xícara</span> de água morna</td><td class="fill" colspan="2"></td></tr><tr><td class="ing"><span class="q">1 colher de sopa</span> de fermento</td><td class="fill" colspan="2"></td></tr></table></div>
+      </section></div>
+    
+    <aside class="tips"><h3>Dicas</h3><ul><li>Substituir cerca de 30% do açúcar comum por mascavo.</li><li>Bater as claras em neve separadamente.</li><li>Adicionar ½ colher de sopa de vinagre depois de misturar o fermento.</li></ul></aside>
     <a class="back" href="#sumario">↑ Sumário</a>
   </article>
-
-  <!-- 02 BOLO DE CHOCOLATE -->
-  <article class="sheet" id="bolo-de-chocolate">
+  <article class="sheet recipe" id="bolo-de-chocolate">
     <header class="recipe-head">
       <div class="eyebrow"><span>Receita 02 / 07</span><span>Bolos</span></div>
       <h2>Bolo de Chocolate</h2>
-      <ul class="meta">
-        <li><b>Forno</b>180 °C</li>
-        <li><b>Tempo</b>40 min</li>
-        <li><b>Forma</b>untada</li>
-      </ul>
+      <ul class="meta"><li><b>Forno</b>180 °C</li><li><b>Tempo</b>40 min</li><li><b>Forma</b>untada</li></ul>
     </header>
-    <div class="recipe-body">
-      <section>
-        <h3>Ingredientes</h3>
-        <ul class="ing">
-          <li><span class="q">2 xícaras</span> de farinha</li>
-          <li><span class="q">1 xícara</span> de açúcar</li>
-          <li><span class="q">1 xícara</span> de achocolatado em pó</li>
-          <li><span class="q">1 xícara</span> de azeite</li>
-          <li><span class="q">3</span> ovos</li>
-          <li><span class="q">1 xícara</span> de água morna</li>
-          <li><span class="q">1 colher de sopa</span> de fermento</li>
-        </ul>
-      </section>
-      <section>
-        <h3>Modo de preparo</h3>
-        <ol class="steps">
-          <li><span>Bater os ovos, o azeite, o açúcar e o achocolatado no liquidificador.</span></li>
-          <li><span>Despejar em uma vasilha e acrescentar a farinha peneirada aos poucos, dobrando na massa.</span></li>
-          <li><span>Adicionar a água morna e o fermento, e misturar.</span></li>
-          <li><span>Colocar a massa em uma forma untada e assar por <strong>40 minutos</strong> em forno preaquecido a <strong>180 °C</strong>.</span></li>
-        </ol>
-      </section>
-    </div>
-    <aside class="tips">
-      <h3>Dicas</h3>
-      <ul>
-        <li>Substituir cerca de 30% do açúcar comum por mascavo.</li>
-        <li>Bater as claras em neve separadamente.</li>
-        <li>Adicionar ½ colher de sopa de vinagre depois de misturar o fermento.</li>
-      </ul>
-    </aside>
+    <div class="cards">
+      <section class="card-block">
+        
+        <div class="card-wrap"><table class="card" style="--ops:4"><colgroup><col class="c-ing"><col class="c-op"><col class="c-op"><col class="c-op"><col class="c-op"></colgroup><tr><td class="pre" colspan="5">Untar uma forma</td></tr><tr><td class="pre" colspan="5">Preaquecer o forno a 180 °C</td></tr><tr><td class="ing"><span class="q">3</span> ovos</td><td class="op" rowspan="4">bater no liquidificador</td><td class="op" rowspan="5">dobrar aos poucos</td><td class="op" rowspan="7">misturar</td><td class="op final" rowspan="7">assar<br><span class="t">180&nbsp;°C</span><span class="t">40&nbsp;min</span></td></tr><tr><td class="ing"><span class="q">1 xícara</span> de azeite</td></tr><tr><td class="ing"><span class="q">1 xícara</span> de açúcar</td></tr><tr><td class="ing"><span class="q">1 xícara</span> de achocolatado em pó</td></tr><tr><td class="ing"><span class="q">2 xícaras</span> de farinha, peneirada</td><td class="fill"></td></tr><tr><td class="ing"><span class="q">1 xícara</span> de água morna</td><td class="fill" colspan="2"></td></tr><tr><td class="ing"><span class="q">1 colher de sopa</span> de fermento</td><td class="fill" colspan="2"></td></tr></table></div>
+      </section></div>
+    
+    <aside class="tips"><h3>Dicas</h3><ul><li>Substituir cerca de 30% do açúcar comum por mascavo.</li><li>Bater as claras em neve separadamente.</li><li>Adicionar ½ colher de sopa de vinagre depois de misturar o fermento.</li></ul></aside>
     <a class="back" href="#sumario">↑ Sumário</a>
   </article>
-
-  <!-- PARTE II -->
   <section class="sheet part" id="parte-chocolate">
     <div class="eyebrow">Parte II</div>
     <h2>Chocolate</h2>
     <p>Meio amargo e ao leite, em três texturas: denso, aerado e com o centro mole.</p>
   </section>
-
-  <!-- 03 BROWNIE -->
-  <article class="sheet" id="brownie">
+  <article class="sheet recipe" id="brownie">
     <header class="recipe-head">
       <div class="eyebrow"><span>Receita 03 / 07</span><span>Chocolate</span></div>
       <h2>Brownie</h2>
-      <ul class="meta">
-        <li><b>Forno</b>180 °C</li>
-        <li><b>Tempo</b>20–25 min</li>
-        <li><b>Forma</b>quadrada</li>
-      </ul>
+      <ul class="meta"><li><b>Forno</b>180 °C</li><li><b>Tempo</b>20–25 min</li><li><b>Forma</b>quadrada</li></ul>
     </header>
-    <div class="recipe-body">
-      <section>
-        <h3>Ingredientes</h3>
-        <ul class="ing">
-          <li><span class="q">90 g</span> de chocolate meio amargo</li>
-          <li><span class="q">90 g</span> de chocolate ao leite</li>
-          <li><span class="q">200 g</span> de manteiga</li>
-          <li><span class="q">1 xícara</span> de açúcar</li>
-          <li><span class="q">2</span> ovos pequenos</li>
-          <li><span class="q">1 ½ colher de sopa</span> de extrato de baunilha</li>
-          <li><span class="q">10 colheres</span> de farinha de trigo</li>
-          <li><span class="q">3 colheres de sopa</span> de cacau em pó</li>
-          <li><span class="q">1 pitada</span> de sal</li>
-        </ul>
-      </section>
-      <section>
-        <h3>Modo de preparo</h3>
-        <ol class="steps">
-          <li><span>Derreter o chocolate meio amargo no micro-ondas em intervalos de 20 s.</span></li>
-          <li><span>Bater a manteiga e o açúcar na batedeira.</span></li>
-          <li><span>Adicionar os ovos e a baunilha e bater até a mistura ficar fofa, de 1 a 2 minutos.</span></li>
-          <li><span>Misturar o chocolate derretido, garantindo que não esteja quente demais para não cozinhar os ovos.</span></li>
-          <li><span>Adicionar os secos e dobrar na massa.</span></li>
-          <li><span>Adicionar o chocolate ao leite em pedaços.</span></li>
-          <li><span>Transferir a massa para uma forma quadrada.</span></li>
-          <li><span>Assar em forno preaquecido a <strong>180 °C</strong> por <strong>20 a 25 minutos</strong>.</span></li>
-        </ol>
-      </section>
-    </div>
-    <aside class="tips">
-      <h3>Dica</h3>
-      <ul>
-        <li>Servir com sorvete de creme.</li>
-      </ul>
-    </aside>
+    <div class="cards">
+      <section class="card-block">
+        
+        <div class="card-wrap"><table class="card" style="--ops:6"><colgroup><col class="c-ing"><col class="c-op"><col class="c-op"><col class="c-op"><col class="c-op"><col class="c-op"><col class="c-op"></colgroup><tr><td class="pre" colspan="7">Separar uma forma quadrada</td></tr><tr><td class="pre" colspan="7">Preaquecer o forno a 180 °C</td></tr><tr><td class="ing"><span class="q">200 g</span> de manteiga</td><td class="op" rowspan="2">bater na batedeira</td><td class="op" rowspan="4">bater até ficar fofo<br><span class="t">1–2&nbsp;min</span></td><td class="op" rowspan="5">misturar<sup>2</sup></td><td class="op" rowspan="8">dobrar</td><td class="op" rowspan="9">incorporar em pedaços</td><td class="op final" rowspan="9">transferir para a forma e assar<br><span class="t">180&nbsp;°C</span><span class="t">20–25&nbsp;min</span></td></tr><tr><td class="ing"><span class="q">1 xícara</span> de açúcar</td></tr><tr><td class="ing"><span class="q">2</span> ovos pequenos</td><td class="fill"></td></tr><tr><td class="ing"><span class="q">1 ½ colher de sopa</span> de extrato de baunilha</td><td class="fill"></td></tr><tr><td class="ing"><span class="q">90 g</span> de chocolate meio amargo</td><td class="op">derreter no micro-ondas<sup>1</sup></td><td class="fill"></td></tr><tr><td class="ing"><span class="q">10 colheres</span> de farinha de trigo</td><td class="fill" colspan="3"></td></tr><tr><td class="ing"><span class="q">3 colheres de sopa</span> de cacau em pó</td><td class="fill" colspan="3"></td></tr><tr><td class="ing"><span class="q">1 pitada</span> de sal</td><td class="fill" colspan="3"></td></tr><tr><td class="ing"><span class="q">90 g</span> de chocolate ao leite</td><td class="fill" colspan="4"></td></tr></table></div>
+      </section></div>
+    <ol class="notes"><li>Em intervalos de 20 s.</li><li>O chocolate não pode estar quente, para não cozinhar os ovos.</li></ol>
+    <aside class="tips"><h3>Dica</h3><ul><li>Servir com sorvete de creme.</li></ul></aside>
     <a class="back" href="#sumario">↑ Sumário</a>
   </article>
-
-  <!-- 04 MOUSSE -->
-  <article class="sheet" id="mousse-de-chocolate">
+  <article class="sheet recipe" id="mousse-de-chocolate">
     <header class="recipe-head">
       <div class="eyebrow"><span>Receita 04 / 07</span><span>Chocolate</span></div>
       <h2>Mousse de Chocolate</h2>
-      <ul class="meta">
-        <li><b>Fogo</b>baixo</li>
-        <li><b>Geladeira</b>2 h</li>
-      </ul>
+      <ul class="meta"><li><b>Fogo</b>baixo</li><li><b>Geladeira</b>2 h</li></ul>
     </header>
-    <div class="recipe-body">
-      <section>
-        <h3>Ingredientes</h3>
-        <ul class="ing">
-          <li><span class="q">2</span> claras</li>
-          <li><span class="q">¼ xícara</span> de açúcar</li>
-          <li><span class="q">1 barra</span> de chocolate meio amargo</li>
-          <li><span class="q">1 barra</span> de chocolate ao leite</li>
-          <li><span class="q">100 g</span> de creme de leite</li>
-        </ul>
-      </section>
-      <section>
-        <h3>Modo de preparo</h3>
-        <ol class="steps">
-          <li><span>Bater as claras com o açúcar em fogo baixo por <strong>3 minutos</strong>, tirando do fogo por 5 segundos a cada 30 segundos, sem parar de bater.</span></li>
-          <li><span>Continuar batendo até chegar ao ponto de merengue.</span></li>
-          <li><span>Derreter os chocolates e misturar com o creme de leite.</span></li>
-          <li><span>Misturar o merengue e o chocolate com cuidado.</span></li>
-          <li><span>Refrigerar por <strong>2 horas</strong>.</span></li>
-        </ol>
-      </section>
-    </div>
+    <div class="cards">
+      <section class="card-block">
+        
+        <div class="card-wrap"><table class="card" style="--ops:4"><colgroup><col class="c-ing"><col class="c-op"><col class="c-op"><col class="c-op"><col class="c-op"></colgroup><tr><td class="ing"><span class="q">2</span> claras</td><td class="op" rowspan="2">bater em fogo baixo<sup>1</sup><br><span class="t">3&nbsp;min</span></td><td class="op" rowspan="2">bater até o ponto de merengue</td><td class="op" rowspan="5">misturar com cuidado</td><td class="op final" rowspan="5">refrigerar<br><span class="t">2&nbsp;h</span></td></tr><tr><td class="ing"><span class="q">¼ xícara</span> de açúcar</td></tr><tr><td class="ing"><span class="q">1 barra</span> de chocolate meio amargo</td><td class="op" rowspan="2">derreter</td><td class="op" rowspan="3">misturar</td></tr><tr><td class="ing"><span class="q">1 barra</span> de chocolate ao leite</td></tr><tr><td class="ing"><span class="q">100 g</span> de creme de leite</td><td class="fill"></td></tr></table></div>
+      </section></div>
+    <ol class="notes"><li>Tirar do fogo por 5 s a cada 30 s, sem parar de bater.</li></ol>
+    
     <a class="back" href="#sumario">↑ Sumário</a>
   </article>
-
-  <!-- 05 PETIT GÂTEAU -->
-  <article class="sheet" id="petit-gateau">
+  <article class="sheet recipe" id="petit-gateau">
     <header class="recipe-head">
       <div class="eyebrow"><span>Receita 05 / 07</span><span>Chocolate</span></div>
       <h2>Petit Gâteau</h2>
-      <ul class="meta">
-        <li><b>Forno</b>200 °C</li>
-        <li><b>Tempo</b>10–15 min</li>
-        <li><b>Forma</b>ramequins</li>
-      </ul>
+      <ul class="meta"><li><b>Forno</b>200 °C</li><li><b>Tempo</b>10–15 min</li><li><b>Forma</b>ramequins</li></ul>
     </header>
-    <div class="recipe-body">
-      <section>
-        <h3>Ingredientes</h3>
-        <ul class="ing">
-          <li><span class="q">150 g</span> de chocolate meio amargo</li>
-          <li><span class="q">100 g</span> de manteiga</li>
-          <li><span class="q">4</span> ovos</li>
-          <li><span class="q">¾ xícara</span> de trigo</li>
-          <li><span class="q">2 colheres de sopa</span> de cacau em pó</li>
-          <li><span class="q">1 pitada</span> de sal</li>
-        </ul>
-      </section>
-      <section>
-        <h3>Modo de preparo</h3>
-        <ol class="steps">
-          <li><span>Derreter o chocolate com a manteiga até ficar bem líquido.</span></li>
-          <li><span>Adicionar o açúcar e misturar bem.</span></li>
-          <li><span>Adicionar os ovos e misturar bem.</span></li>
-          <li><span>Adicionar o trigo, o cacau e o sal e misturar bem.</span></li>
-          <li><span>Untar os ramequins com cacau.</span></li>
-          <li><span>Encher cada ramequim até ¾ do volume.</span></li>
-          <li><span>Assar em forno preaquecido a <strong>200 °C</strong> por <strong>10 a 15 minutos</strong>, sem deixar muito líquido nem muito seco.</span></li>
-        </ol>
-      </section>
-    </div>
+    <div class="cards">
+      <section class="card-block">
+        
+        <div class="card-wrap"><table class="card" style="--ops:6"><colgroup><col class="c-ing"><col class="c-op"><col class="c-op"><col class="c-op"><col class="c-op"><col class="c-op"><col class="c-op"></colgroup><tr><td class="pre" colspan="7">Untar os ramequins com cacau</td></tr><tr><td class="pre" colspan="7">Preaquecer o forno a 200 °C</td></tr><tr><td class="ing"><span class="q">150 g</span> de chocolate meio amargo</td><td class="op" rowspan="2">derreter até ficar bem líquido</td><td class="op" rowspan="3">misturar bem</td><td class="op" rowspan="4">misturar bem</td><td class="op" rowspan="7">misturar bem</td><td class="op" rowspan="7">encher os ramequins até ¾</td><td class="op final" rowspan="7">assar<sup>2</sup><br><span class="t">200&nbsp;°C</span><span class="t">10–15&nbsp;min</span></td></tr><tr><td class="ing"><span class="q">100 g</span> de manteiga</td></tr><tr><td class="ing"><span class="q">—</span> de açúcar<sup>1</sup></td><td class="fill"></td></tr><tr><td class="ing"><span class="q">4</span> ovos</td><td class="fill" colspan="2"></td></tr><tr><td class="ing"><span class="q">¾ xícara</span> de trigo</td><td class="fill" colspan="3"></td></tr><tr><td class="ing"><span class="q">2 colheres de sopa</span> de cacau em pó</td><td class="fill" colspan="3"></td></tr><tr><td class="ing"><span class="q">1 pitada</span> de sal</td><td class="fill" colspan="3"></td></tr></table></div>
+      </section></div>
+    <ol class="notes"><li>A receita original pede açúcar no preparo mas não informa a quantidade.</li><li>Sem deixar muito líquido nem muito seco.</li></ol>
+    
     <a class="back" href="#sumario">↑ Sumário</a>
   </article>
-
-  <!-- PARTE III -->
   <section class="sheet part" id="parte-massas">
     <div class="eyebrow">Parte III</div>
     <h2>Massas</h2>
     <p>As receitas de paciência: sova, descanso, geladeira e forno em duas temperaturas.</p>
   </section>
-
-  <!-- 06 PIZZA -->
-  <article class="sheet" id="massa-de-pizza">
+  <article class="sheet recipe" id="massa-de-pizza">
     <header class="recipe-head">
       <div class="eyebrow"><span>Receita 06 / 07</span><span>Massas</span></div>
       <h2>Massa de Pizza</h2>
-      <ul class="meta">
-        <li><b>Forno</b>200 °C</li>
-        <li><b>Tempo</b>30–40 min</li>
-        <li><b>Descanso</b>1 h+</li>
-        <li><b>Rende</b>2 massas</li>
-      </ul>
+      <ul class="meta"><li><b>Forno</b>200 °C</li><li><b>Tempo</b>30–40 min</li><li><b>Descanso</b>1 h+</li><li><b>Rende</b>2 massas</li></ul>
     </header>
-    <div class="recipe-body">
-      <section>
-        <h3>Ingredientes</h3>
-        <ul class="ing">
-          <li><span class="q">3 xícaras</span> de farinha de trigo</li>
-          <li><span class="q">1 colher de sopa</span> de fermento biológico seco</li>
-          <li><span class="q">1 colher de chá</span> de açúcar</li>
-          <li><span class="q">1 colher de chá</span> de sal</li>
-          <li><span class="q">1 ¼ xícara</span> de água morna</li>
-          <li><span class="q">1 colher de sopa</span> de azeite de oliva</li>
-          <li>Farinha para polvilhar</li>
-          <li>Azeite para untar</li>
-        </ul>
-      </section>
-      <section>
-        <h3>Modo de preparo</h3>
-        <ol class="steps">
-          <li><span>Em uma tigela pequena, misturar o fermento e o açúcar.</span></li>
-          <li><span>Adicionar a água morna e misturar.</span></li>
-          <li><span>Reservar até espumar.</span></li>
-          <li><span>Em uma tigela grande, peneirar a farinha.</span></li>
-          <li><span>Adicionar o sal.</span></li>
-          <li><span>Abrir um buraco no centro e adicionar a água com o fermento ativado.</span></li>
-          <li><span>Adicionar o azeite.</span></li>
-          <li><span>Misturar e sovar a massa por cerca de <strong>15 minutos</strong>.</span></li>
-          <li><span>Untar 2 tigelas com azeite.</span></li>
-          <li><span>Separar a massa em duas porções.</span></li>
-          <li><span>Colocar cada porção para descansar em uma tigela, em forma de bola.</span></li>
-          <li><span>Cobrir com um pano limpo.</span></li>
-          <li><span>Descansar por pelo menos <strong>1 hora</strong>.</span></li>
-          <li><span>Para abrir a massa, apoiá-la sobre os punhos, sem amassar, polvilhando com farinha.</span></li>
-          <li><span>Colocar em uma assadeira e montar a pizza.</span></li>
-          <li><span>Assar em forno preaquecido a <strong>200 °C</strong> por <strong>30 a 40 minutos</strong>.</span></li>
-        </ol>
-      </section>
-    </div>
-    <aside class="tips">
-      <h3>Dicas</h3>
-      <ul>
-        <li>Trocar ⅓ da farinha por integral ou outros grãos.</li>
-        <li>Molho de tomate rápido: bater 1 tomate maduro e 1 cenoura com um pouco de azeite.</li>
-      </ul>
-    </aside>
+    <div class="cards">
+      <section class="card-block">
+        
+        <div class="card-wrap"><table class="card" style="--ops:6"><colgroup><col class="c-ing"><col class="c-op"><col class="c-op"><col class="c-op"><col class="c-op"><col class="c-op"><col class="c-op"></colgroup><tr><td class="pre" colspan="7">Untar 2 tigelas com azeite</td></tr><tr><td class="ing"><span class="q">3 xícaras</span> de farinha de trigo</td><td class="op" rowspan="2">peneirar e juntar</td><td class="op" rowspan="6">juntar no centro<sup>2</sup></td><td class="op" rowspan="6">sovar<br><span class="t">~15&nbsp;min</span></td><td class="op" rowspan="6">dividir em 2 bolas e descansar nas tigelas, cobertas<br><span class="t">1&nbsp;h+</span></td><td class="op" rowspan="7">abrir sobre os punhos<sup>3</sup></td><td class="op final" rowspan="7">montar na assadeira e assar<br><span class="t">200&nbsp;°C</span><span class="t">30–40&nbsp;min</span></td></tr><tr><td class="ing"><span class="q">1 colher de chá</span> de sal</td></tr><tr><td class="ing"><span class="q">1 colher de sopa</span> de fermento biológico seco</td><td class="op" rowspan="3">misturar e deixar espumar<sup>1</sup></td></tr><tr><td class="ing"><span class="q">1 colher de chá</span> de açúcar</td></tr><tr><td class="ing"><span class="q">1 ¼ xícara</span> de água morna</td></tr><tr><td class="ing"><span class="q">1 colher de sopa</span> de azeite de oliva</td><td class="fill"></td></tr><tr><td class="ing"><span class="q">a gosto</span> farinha para polvilhar</td><td class="fill" colspan="4"></td></tr></table></div>
+      </section></div>
+    <ol class="notes"><li>Misturar o fermento com o açúcar numa tigela pequena, depois a água.</li><li>Abrir um buraco no centro da farinha e despejar o fermento ativado e o azeite.</li><li>Sem amassar, polvilhando com farinha.</li></ol>
+    <aside class="tips"><h3>Dicas</h3><ul><li>Trocar ⅓ da farinha por integral ou outros grãos.</li><li>Molho de tomate rápido: bater 1 tomate maduro e 1 cenoura com um pouco de azeite.</li></ul></aside>
     <a class="back" href="#sumario">↑ Sumário</a>
   </article>
-
-  <!-- 07 TORTA DE MAÇÃ -->
-  <article class="sheet" id="torta-de-maca">
+  <article class="sheet recipe" id="torta-de-maca">
     <header class="recipe-head">
       <div class="eyebrow"><span>Receita 07 / 07</span><span>Massas</span></div>
       <h2>Torta de Maçã</h2>
-      <ul class="meta">
-        <li><b>Forno</b>220 → 180 °C</li>
-        <li><b>Tempo</b>1 h</li>
-        <li><b>Geladeira</b>1 h</li>
-        <li><b>Descanso</b>1 h</li>
-      </ul>
+      <ul class="meta"><li><b>Forno</b>220 → 180 °C</li><li><b>Tempo</b>1 h</li><li><b>Geladeira</b>1 h</li><li><b>Descanso</b>1 h</li></ul>
     </header>
-    <div class="recipe-body">
-      <section>
-        <h3>Ingredientes</h3>
-        <div class="group">
-          <h4>Massa</h4>
-          <ul class="ing">
-            <li><span class="q">2 ¼ xícaras</span> de farinha de trigo</li>
-            <li><span class="q">½ colher de sopa</span> de açúcar</li>
-            <li><span class="q">½ colher de chá</span> de sal</li>
-            <li><span class="q">200 g</span> de manteiga</li>
-            <li><span class="q">5 a 6 colheres de sopa</span> de água gelada (com gelo)</li>
-          </ul>
-        </div>
-        <div class="group">
-          <h4>Recheio</h4>
-          <ul class="ing">
-            <li><span class="q">8 colheres de sopa</span> de manteiga</li>
-            <li><span class="q">3 colheres de sopa</span> de farinha de trigo</li>
-            <li><span class="q">¼ xícara</span> de água</li>
-            <li><span class="q">1 xícara</span> de açúcar</li>
-            <li><span class="q">6</span> maçãs verdes grandes (Granny Smith)</li>
-            <li><span class="q">2 ½ colheres de sopa</span> de canela</li>
-            <li><span class="q">½ colher de sopa</span> de gengibre</li>
-            <li>Suco de <span class="q">1</span> limão</li>
-            <li><span class="q">1 pitada</span> de sal</li>
-          </ul>
-        </div>
-        <div class="group">
-          <h4>Finalização</h4>
-          <ul class="ing">
-            <li><span class="q">1</span> ovo</li>
-            <li><span class="q">1 colher</span> de açúcar</li>
-          </ul>
-        </div>
+    <div class="cards">
+      <section class="card-block">
+        <h3 class="card-label">Massa</h3>
+        <div class="card-wrap"><table class="card" style="--ops:4"><colgroup><col class="c-ing"><col class="c-op"><col class="c-op"><col class="c-op"><col class="c-op"></colgroup><tr><td class="ing"><span class="q">2 ¼ xícaras</span> de farinha de trigo</td><td class="op" rowspan="3">misturar</td><td class="op" rowspan="4">esfarelar até virar ervilhas<sup>1</sup></td><td class="op" rowspan="5">adicionar aos poucos até dar ponto<sup>2</sup></td><td class="op final" rowspan="5">dividir em 2 discos, envolver em filme e gelar<br><span class="t">1&nbsp;h</span></td></tr><tr><td class="ing"><span class="q">½ colher de sopa</span> de açúcar</td></tr><tr><td class="ing"><span class="q">½ colher de chá</span> de sal</td></tr><tr><td class="ing"><span class="q">200 g</span> de manteiga gelada, em cubos</td><td class="fill"></td></tr><tr><td class="ing"><span class="q">5 a 6 colheres de sopa</span> de água gelada (com gelo)</td><td class="fill" colspan="2"></td></tr></table></div>
       </section>
-      <section>
-        <h3>Modo de preparo</h3>
-        <div class="group">
-          <h4>Massa</h4>
-          <ol class="steps">
-            <li><span>Misturar todos os secos.</span></li>
-            <li><span>Adicionar a manteiga gelada, cortada em cubos.</span></li>
-            <li><span>Misturar formando bolinhas do tamanho de ervilhas, tocando o mínimo possível com as mãos para não derreter a manteiga.</span></li>
-            <li><span>Adicionar a água gelada aos poucos e misturar até dar ponto: dois pedaços de massa grudam ao serem juntados.</span></li>
-            <li><span>Dividir em 2 discos grossos, envolver em plástico-filme e levar à geladeira por <strong>1 hora</strong>.</span></li>
-          </ol>
-        </div>
-        <div class="group">
-          <h4>Recheio</h4>
-          <ol class="steps">
-            <li><span>Derreter a manteiga em uma frigideira.</span></li>
-            <li><span>Adicionar a farinha e bater com fouet por 1 minuto.</span></li>
-            <li><span>Adicionar a água e o açúcar.</span></li>
-            <li><span>Quando levantar fervura, cozinhar por <strong>3 minutos</strong>, mexendo de vez em quando, e reservar.</span></li>
-            <li><span>Descascar as maçãs e cortar ao meio.</span></li>
-            <li><span>Remover o miolo e fatiar finamente.</span></li>
-            <li><span>Em uma vasilha grande, misturar as maçãs com o gengibre, a canela e o suco de limão.</span></li>
-            <li><span>Com o molho já frio, adicionar às maçãs e misturar bem.</span></li>
-          </ol>
-        </div>
-        <div class="group">
-          <h4>Montagem</h4>
-          <ol class="steps">
-            <li><span>Abrir um dos discos sobre uma superfície enfarinhada.</span></li>
-            <li><span>Transferir para a forma.</span></li>
-            <li><span>Adicionar o recheio formando uma superfície convexa, com menos recheio nas bordas.</span></li>
-            <li><span>Abrir o segundo disco e cortar em tiras.</span></li>
-            <li><span>Entrelaçar as tiras sobre o recheio.</span></li>
-            <li><span>Com as sobras, fazer a borda, sem deixá-la muito pontiaguda para não queimar.</span></li>
-            <li><span>Bater o ovo com uma colher generosa de açúcar e pincelar sobre a massa.</span></li>
-          </ol>
-        </div>
-        <div class="group">
-          <h4>Forno</h4>
-          <ol class="steps">
-            <li><span>Com o forno preaquecido a <strong>220 °C</strong>, assar por <strong>15 minutos</strong>.</span></li>
-            <li><span>Sem abrir o forno, baixar para <strong>180 °C</strong> e assar por mais <strong>45 minutos</strong>, ou até o recheio borbulhar pelos furos e a maçã ficar macia.</span></li>
-            <li><span><strong>Deixar a torta descansar por 1 hora antes de cortar.</strong></span></li>
-          </ol>
-        </div>
+      <section class="card-block">
+        <h3 class="card-label">Recheio</h3>
+        <div class="card-wrap"><table class="card" style="--ops:4"><colgroup><col class="c-ing"><col class="c-op"><col class="c-op"><col class="c-op"><col class="c-op"></colgroup><tr><td class="ing"><span class="q">8 colheres de sopa</span> de manteiga</td><td class="op">derreter na frigideira</td><td class="op" rowspan="2">bater com fouet<br><span class="t">1&nbsp;min</span></td><td class="op" rowspan="4">ferver, cozinhar e reservar até esfriar<br><span class="t">3&nbsp;min</span></td><td class="op final" rowspan="9">misturar bem</td></tr><tr><td class="ing"><span class="q">3 colheres de sopa</span> de farinha de trigo</td><td class="fill"></td></tr><tr><td class="ing"><span class="q">¼ xícara</span> de água</td><td class="fill" colspan="2"></td></tr><tr><td class="ing"><span class="q">1 xícara</span> de açúcar</td><td class="fill" colspan="2"></td></tr><tr><td class="ing"><span class="q">6</span> maçãs verdes grandes (Granny Smith)</td><td class="op">descascar, tirar o miolo e fatiar fino</td><td class="op" rowspan="5">misturar</td><td class="fill" rowspan="5"></td></tr><tr><td class="ing"><span class="q">2 ½ colheres de sopa</span> de canela</td><td class="fill"></td></tr><tr><td class="ing"><span class="q">½ colher de sopa</span> de gengibre</td><td class="fill"></td></tr><tr><td class="ing"><span class="q">1</span> limão, em suco</td><td class="fill"></td></tr><tr><td class="ing"><span class="q">1 pitada</span> de sal</td><td class="fill"></td></tr></table></div>
       </section>
-    </div>
-    <aside class="tips">
-      <h3>Dica</h3>
-      <ul>
-        <li>Servir com sorvete de creme.</li>
-      </ul>
-    </aside>
+      <section class="card-block">
+        <h3 class="card-label">Montagem e forno</h3>
+        <div class="card-wrap"><table class="card" style="--ops:6"><colgroup><col class="c-ing"><col class="c-op"><col class="c-op"><col class="c-op"><col class="c-op"><col class="c-op"><col class="c-op"></colgroup><tr><td class="pre" colspan="7">Preaquecer o forno a 220 °C</td></tr><tr><td class="ing ref">1 disco de massa</td><td class="op">abrir em superfície enfarinhada e forrar a forma</td><td class="op" rowspan="2">rechear em cúpula<sup>3</sup></td><td class="op" rowspan="3">trançar por cima; fazer a borda com as sobras<sup>4</sup></td><td class="op" rowspan="5">pincelar</td><td class="op" rowspan="5">assar<sup>5</sup><br><span class="t">220&nbsp;°C · 15&nbsp;min</span><span class="t">180&nbsp;°C · 45&nbsp;min</span></td><td class="op final" rowspan="5">descansar antes de cortar<br><span class="t">1&nbsp;h</span></td></tr><tr><td class="ing ref">recheio</td><td class="fill"></td></tr><tr><td class="ing ref">1 disco de massa</td><td class="op">abrir e cortar em tiras</td><td class="fill"></td></tr><tr><td class="ing"><span class="q">1</span> ovo</td><td class="op" rowspan="2">bater</td><td class="fill" rowspan="2" colspan="2"></td></tr><tr><td class="ing"><span class="q">1 colher generosa</span> de açúcar</td></tr></table></div>
+      </section></div>
+    <ol class="notes"><li>Tocar o mínimo possível com as mãos, para não derreter a manteiga.</li><li>Ponto: dois pedaços de massa grudam ao serem juntados.</li><li>Menos recheio nas bordas.</li><li>Borda sem pontas, para não queimar.</li><li>Baixar a temperatura sem abrir o forno. Está pronta quando o recheio borbulha pelos furos e a maçã fica macia.</li></ol>
+    <aside class="tips"><h3>Dica</h3><ul><li>Servir com sorvete de creme.</li></ul></aside>
     <a class="back" href="#sumario">↑ Sumário</a>
   </article>
-
-  <!-- COLOFÃO -->
   <section class="sheet colophon" id="colofao">
     <div class="eyebrow">Colofão</div>
     <div class="mark">Bom apetite.</div>
-    <p>Receitas reunidas por Gabriel Sprotte Kumlehn a partir do repositório livro-receitas. Projeto gráfico Atta Studio, composto em Fraunces, Geist e Geist Mono.</p>
+    <p>Receitas reunidas por Gabriel Sprotte Kumlehn a partir do repositório livro-receitas. Cartões no formato algorítmico popularizado pelo Cooking for Engineers. Projeto gráfico Atta Studio, composto em Fraunces, Geist e Geist Mono.</p>
   </section>
-
 </main>
