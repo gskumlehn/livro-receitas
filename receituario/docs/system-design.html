@@ -111,7 +111,7 @@ svg .ah.async { fill: var(--brand-accent); }
   <div class="eyebrow">Atta Studio · Documento de design de sistema</div>
   <h1>Receituário <em>em produção</em></h1>
   <p class="lede">Como tirar o gerenciador de livros de receitas algorítmicas do protótipo e colocá-lo no ar como produto público, com contas, publicação, páginas abertas e exportação em PDF.</p>
-  <div class="docmeta"><span><b>Autor</b> Gabriel S. Kumlehn</span><span><b>Status</b> proposta</span><span><b>Data</b> 18 out 2026</span><span><b>Versão</b> 0.1</span></div>
+  <div class="docmeta"><span><b>Autor</b> Gabriel S. Kumlehn</span><span><b>Status</b> proposta</span><span><b>Data</b> 18 out 2026</span><span><b>Versão</b> 0.2</span></div>
 
   <ul class="toc">
     <li><a href="#resumo"><span>01</span>Resumo da decisão</a></li>
@@ -120,7 +120,7 @@ svg .ah.async { fill: var(--brand-accent); }
     <li><a href="#fluxos"><span>04</span>Fluxos principais</a></li>
     <li><a href="#dados"><span>05</span>Modelo de dados</a></li>
     <li><a href="#api"><span>06</span>API</a></li>
-    <li><a href="#motor"><span>07</span>O motor do cartão</a></li>
+    <li><a href="#motor"><span>07</span>O motor do cartão e a importação com IA</a></li>
     <li><a href="#cache"><span>08</span>Cache e entrega</a></li>
     <li><a href="#fila"><span>09</span>Fila, PDF e retries</a></li>
     <li><a href="#escala"><span>10</span>Carga e escala</a></li>
@@ -310,7 +310,7 @@ svg .ah.async { fill: var(--brand-accent); }
   </table></div>
 
   <!-- 07 -->
-  <h2 id="motor"><span class="n">07</span>O motor do cartão</h2>
+  <h2 id="motor"><span class="n">07</span>O motor do cartão e a importação com IA</h2>
   <p>É a parte que só este produto tem, e por isso vira um pacote isolado (<code>@receituario/card</code>) com testes próprios. O código já existe no protótipo e muda pouco.</p>
   <ul>
     <li><b><code>validate(section)</code>:</b> verifica se os passos só usam ingredientes da seção e passos anteriores (o que impede ciclo), se cada item é consumido por no máximo um passo, se existe uma raiz única e se nenhum ingrediente nomeado fica de fora. Devolve avisos legíveis, que o editor mostra e a publicação exige zerados.</li>
@@ -318,6 +318,27 @@ svg .ah.async { fill: var(--brand-accent); }
     <li><b><code>renderHtml(recipe)</code>:</b> HTML com texto sempre escapado. O mesmo resultado vai para o editor, o SSR e o PDF, então o que o autor vê é o que sai impresso.</li>
     <li><b>Testes:</b> testes de propriedade (árvores aleatórias sempre geram uma grade sem buracos nem sobreposição) e snapshots das sete receitas do livro original.</li>
   </ul>
+
+  <h3>Importação com IA: foto ou texto → cartão</h3>
+  <p>O autor fotografa a página do caderno ou do livro (ou cola o texto) e recebe o cartão montado para revisar. É o atalho que mais reduz a fricção de digitar um livro inteiro, e entra no MVP.</p>
+  <ol>
+    <li><b>Upload:</b> o cliente reduz cada foto para cerca de 1.600 px no maior lado e envia até 5 imagens para <code>POST /api/import</code>. O servidor guarda as fotos num bucket privado com expiração de 7 dias, para reprocessar ou auditar.</li>
+    <li><b>Leitura e estrutura numa chamada:</b> o servidor chama a API do Claude com as imagens e um prompt fixo. Um modelo com visão faz o OCR e a estruturação ao mesmo tempo, o que dispensa um OCR separado e lida bem com letra cursiva, manchas e fotos tortas.</li>
+    <li><b>Saída tipada:</b> a resposta segue o esquema do <code>recipes.body</code>, mais <code>transcricao</code> (o texto lido, para conferência) e <code>duvidas</code> (o que estava ilegível ou faltando). A chamada força a resposta no esquema JSON (uma ferramenta com <code>input_schema</code> na API do Claude), e o servidor ainda valida com Zod.</li>
+    <li><b>Correção determinística:</b> o servidor remapeia ids, descarta inputs que apontam para passos futuros e impede que um item seja consumido duas vezes. Depois roda o <code>validate</code> do motor do cartão, e o que sobrar vira aviso para o autor.</li>
+    <li><b>Revisão humana:</b> o editor recebe o rascunho preenchido, com as dúvidas no topo, a transcrição recolhível e um botão de desfazer. A IA nunca publica sozinha.</li>
+  </ol>
+  <div class="tbl"><table>
+    <thead><tr><th>Ponto</th><th>Decisão</th></tr></thead>
+    <tbody>
+      <tr><td>Onde roda</td><td>Route handler síncrono com streaming de status. Uma receita leva de 10 a 30 s; acima de 3 fotos ou de 60 s, o pedido vai para a fila de jobs e o editor acompanha pelo <code>job_id</code>.</td></tr>
+      <tr><td>Custo</td><td>Uma chamada por importação. Limite de 20 importações por dia por conta no plano gratuito, com contador no Postgres. É o primeiro candidato a recurso pago.</td></tr>
+      <tr><td>Qualidade</td><td>Um conjunto de 30 fotos reais (caderno, livro impresso, print de site) com o cartão esperado. Cada mudança de prompt ou de modelo roda contra ele e mede ingredientes corretos, quantidades corretas e cartões válidos sem edição.</td></tr>
+      <tr><td>Privacidade</td><td>As fotos podem mostrar outras coisas além da receita. Ficam privadas, expiram em 7 dias e não são usadas para mais nada. Os termos de uso dizem isso.</td></tr>
+      <tr><td>Falhas</td><td>Resposta fora do esquema gera uma nova tentativa automática, uma única vez, com o erro de validação no prompt. Depois disso o autor vê a mensagem e pode tentar com outra foto ou colar o texto.</td></tr>
+    </tbody>
+  </table></div>
+  <p>O protótipo já tem esse fluxo funcionando pela IA do próprio claude.ai, com o mesmo prompt e a mesma normalização. Em produção, só a chamada muda de lugar: sai do navegador e passa para o servidor, com a chave da API.</p>
 
   <!-- 08 -->
   <h2 id="cache"><span class="n">08</span>Cache e entrega</h2>
@@ -419,8 +440,8 @@ svg .ah.async { fill: var(--brand-accent); }
   <!-- 14 -->
   <h2 id="roadmap"><span class="n">14</span>Fases e o que revisitar</h2>
   <div class="phases">
-    <div class="phase"><div class="when">FASE 1 · MVP · ~4 SEMANAS</div><h4>No ar</h4><ul><li>Contas e perfil com handle</li><li>Editor com prévia e salvamento automático</li><li>Publicar edição e páginas públicas com SSR</li><li>PDF da edição</li><li>Importação do protótipo e do repositório</li><li>Termos, privacidade, denúncia</li></ul></div>
-    <div class="phase"><div class="when">FASE 2 · CRESCIMENTO</div><h4>Descoberta</h4><ul><li>Estante com busca e filtros</li><li>Fotos de capa e de receita</li><li>"Salvar no meu livro" (cópia com crédito)</li><li>Colar receita em texto e o Claude montar o cartão</li></ul></div>
+    <div class="phase"><div class="when">FASE 1 · MVP · ~4 SEMANAS</div><h4>No ar</h4><ul><li>Contas e perfil com handle</li><li>Editor com prévia e salvamento automático</li><li>Publicar edição e páginas públicas com SSR</li><li>PDF da edição</li><li>Importação do protótipo e do repositório</li><li>Receita a partir de foto ou texto, com IA</li><li>Termos, privacidade, denúncia</li></ul></div>
+    <div class="phase"><div class="when">FASE 2 · CRESCIMENTO</div><h4>Descoberta</h4><ul><li>Estante com busca e filtros</li><li>Fotos de capa e de receita</li><li>"Salvar no meu livro" (cópia com crédito)</li><li>Importar um livro inteiro de uma vez (PDF ou várias fotos)</li></ul></div>
     <div class="phase"><div class="when">FASE 3 · SE HOUVER TRAÇÃO</div><h4>Comunidade</h4><ul><li>Coautoria de livros</li><li>Plano pago (PDF sem marca, livros privados)</li><li>Impressão sob demanda</li><li>Outros idiomas</li></ul></div>
   </div>
   <h3>O que revisitar quando crescer</h3>

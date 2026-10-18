@@ -231,6 +231,35 @@ input::placeholder, textarea::placeholder { color: #9C8D6E; font-style: italic; 
 .hint { font-size: 15px; font-style: italic; color: var(--ink-soft); margin: 0; }
 .confirm-del { color: var(--red) !important; border-color: var(--red) !important; }
 
+/* ---------- importação com IA ---------- */
+.ai { border: 1.5px solid var(--ink); background: var(--paper-hi); position: relative; }
+.ai::before { content: "❧"; position: absolute; top: -14px; left: 14px; background: var(--paper); padding: 0 6px; color: var(--red); font-size: 20px; line-height: 1; }
+.ai > h3 { color: var(--red); }
+.ai .lede-s { margin: 0; font-size: 16px; color: var(--ink-soft); font-style: italic; }
+.drop { position: relative; border: 1.5px dashed var(--ink-soft); padding: 16px; display: grid; gap: 6px; justify-items: center; text-align: center; cursor: pointer; background: rgba(238,226,193,.45); }
+.drop:hover, .drop.over { border-color: var(--red); background: rgba(138,40,23,.05); }
+.drop b { font-family: var(--font-caps); font-weight: 400; letter-spacing: .1em; }
+.drop small { color: var(--ink-soft); font-size: 14px; }
+.drop input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.thumbs { display: flex; flex-wrap: wrap; gap: 12px; }
+.thumbs:empty { display: none; }
+.thumb { position: relative; width: 84px; height: 108px; border: 1px solid var(--ink); background: var(--paper-deep); }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; filter: sepia(.25); }
+.thumb button { position: absolute; top: -9px; right: -9px; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--ink); background: var(--paper-hi); cursor: pointer; font-size: 13px; line-height: 1; padding: 0; }
+.thumb button:hover { background: var(--red); color: var(--paper-hi); border-color: var(--red); }
+.ai-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.ai-status { font-style: italic; color: var(--ink-soft); font-size: 16px; }
+.ai-status.err { color: var(--red); font-style: normal; }
+@media (prefers-reduced-motion: no-preference) { .ai-status .dots::after { content: "…"; animation: blink 1.2s steps(4) infinite; } }
+@keyframes blink { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "…"; } }
+#ai-result:empty { display: none; }
+.ai-result { border-top: 1px solid var(--rule); padding-top: 12px; display: grid; gap: 10px; }
+.ai-result h4 { font-family: var(--font-caps); font-weight: 400; letter-spacing: .1em; font-size: 15px; margin: 0; color: var(--red); }
+.ai-result ul { margin: 4px 0 0; padding-left: 1.2em; font-size: 16px; }
+.ai-result details { font-size: 15px; }
+.ai-result summary { cursor: pointer; font-family: var(--font-caps); letter-spacing: .08em; font-size: 14px; color: var(--ink-soft); }
+.ai-result pre { white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--font-type); font-size: 13.5px; background: var(--paper); border: 1px solid var(--rule); padding: 10px 12px; margin: 8px 0 0; max-height: 260px; overflow: auto; }
+
 footer.colo { text-align: center; margin-top: 56px; font-family: var(--font-caps); letter-spacing: .2em; font-size: 13px; color: var(--ink-soft); }
 
 /* ---------- impressão / exportação ---------- */
@@ -562,7 +591,13 @@ footer.colo { text-align: center; margin-top: 56px; font-family: var(--font-caps
     else if (v === 'howto') app.innerHTML = howtoView();
     else if (v === 'book') app.innerHTML = bookView();
     else if (v === 'editBook') app.innerHTML = editBookView();
-    else if (v === 'editRecipe') { app.innerHTML = editRecipeView(); paintPreview(); }
+    else if (v === 'editRecipe') {
+      app.innerHTML = editRecipeView(); paintPreview(); paintAi();
+      if (AI.limits === undefined) aiLimits().then(() => {
+        const el = S.view === 'editRecipe' && document.getElementById('ai-panel');
+        if (el) { el.innerHTML = aiPanelHtml(); paintAi(); }
+      });
+    }
     app.firstElementChild?.classList.add('fade');
   }
 
@@ -679,7 +714,7 @@ footer.colo { text-align: center; margin-top: 56px; font-family: var(--font-caps
               </span>
             </li>`).join('')}
         </ul>
-        <div><button type="button" class="btn small" data-act="rec-new" data-t="${ti}">+ Receita neste capítulo</button></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn small" data-act="rec-new" data-t="${ti}">+ Receita neste capítulo</button><button type="button" class="btn small red" data-act="rec-new-ai" data-t="${ti}">❧ Receita a partir de foto ou texto</button></div>
       </div>`).join('');
     return `<div class="editor">
       <div class="ed-head"><h2>Editar livro</h2>
@@ -721,6 +756,7 @@ footer.colo { text-align: center; margin-top: 56px; font-family: var(--font-caps
       <div class="ed-head"><h2>${r.title ? esc(r.title) : 'Nova receita'}</h2></div>
       <div class="rec-editor">
         <div class="editor">
+          <div class="panel ai" id="ai-panel">${aiPanelHtml()}</div>
           <div class="panel">
             <h3>Receita</h3>
             <div class="grid2">
@@ -859,6 +895,7 @@ footer.colo { text-align: center; margin-top: 56px; font-family: var(--font-caps
 
   app.addEventListener('input', (ev) => {
     const t = ev.target;
+    if (t.id === 'ai-text') { AI.text = t.value; paintAiActions(); return; }
     if (t.dataset.bk) { setPath(S.edit, t.dataset.bk, t.value); markDirty(); return; }
     if (t.dataset.rc && S.recEdit) {
       setPath(S.recEdit.recipe, t.dataset.rc, t.value); markDirty(); schedulePreview();
@@ -875,6 +912,7 @@ footer.colo { text-align: center; margin-top: 56px; font-family: var(--font-caps
   });
   app.addEventListener('change', (ev) => {
     const t = ev.target;
+    if (t.id === 'ai-file') { addAiFiles(t.files); t.value = ''; return; }
     if (t.dataset.bkCheck) { S.edit[t.dataset.bkCheck] = t.checked; markDirty(); return; }
     if (t.dataset.bk && t.tagName === 'SELECT') { setPath(S.edit, t.dataset.bk, t.value); markDirty(); return; }
     if (t.dataset.rcCheck) {
@@ -899,7 +937,7 @@ footer.colo { text-align: center; margin-top: 56px; font-family: var(--font-caps
     return false;
   }
 
-  async function handleAct(a, el) {
+  async function handleAct(a, el, ev) {
     const b = S.edit, R = S.recEdit?.recipe;
     const si = +el.dataset.s, k = +el.dataset.k, gi = +el.dataset.g;
     switch (a) {
@@ -925,14 +963,24 @@ footer.colo { text-align: center; margin-top: 56px; font-family: var(--font-caps
       case 'rec-up': move(b.themes[+el.dataset.t].recipes, +el.dataset.r, -1); markDirty(); render(); return;
       case 'rec-down': move(b.themes[+el.dataset.t].recipes, +el.dataset.r, 1); markDirty(); render(); return;
       case 'rec-del': if (twoStep(el, '!')) { b.themes[+el.dataset.t].recipes.splice(+el.dataset.r, 1); markDirty(); render(); } return;
+      case 'rec-new-ai': {
+        const t = b.themes[+el.dataset.t];
+        S.recEdit = { themeId: t.id, origThemeId: null, recipe: newRecipe() }; resetAi(); markDirty(); go('editRecipe'); return;
+      }
+      case 'ai-run': return runAi();
+      case 'ai-stop': AI.ctl?.abort(); return;
+      case 'ai-undo': if (AI.prev) { S.recEdit.recipe = AI.prev; AI.prev = null; AI.result = null; AI.msg = 'Importação desfeita.'; AI.err = false; markDirty(); render(); } return;
+      case 'ai-pick': if (ev.target.id !== 'ai-file') document.getElementById('ai-file')?.click(); return;
+      case 'ai-rm': { const i = +el.dataset.i; URL.revokeObjectURL(AI.files[i].url); AI.files.splice(i, 1); paintAi(); return; }
+      case 'ai-close': AI.result = null; AI.prev = null; paintAi(); return;
       case 'rec-new': {
         const t = b.themes[+el.dataset.t];
-        S.recEdit = { themeId: t.id, origThemeId: null, recipe: newRecipe() }; markDirty(); go('editRecipe');
+        S.recEdit = { themeId: t.id, origThemeId: null, recipe: newRecipe() }; resetAi(); markDirty(); go('editRecipe');
         document.getElementById('r-title')?.focus(); return;
       }
       case 'rec-edit': {
         const t = b.themes[+el.dataset.t];
-        S.recEdit = { themeId: t.id, origThemeId: t.id, recipe: clone(t.recipes[+el.dataset.r]) }; go('editRecipe'); return;
+        S.recEdit = { themeId: t.id, origThemeId: t.id, recipe: clone(t.recipes[+el.dataset.r]) }; resetAi(); go('editRecipe'); return;
       }
       case 'rec-back': {
         const blank = !R.title.trim() && !R.sections.some((s) => s.steps.length || s.ings.some((g) => (g.name || g.q).trim()));
@@ -982,6 +1030,179 @@ footer.colo { text-align: center; margin-top: 56px; font-family: var(--font-caps
         document.querySelector(`#steps-${s.id} [data-k="${k}"][data-x="${x}"]`)?.focus(); return;
       }
       case 'download-book': return downloadBook(el);
+    }
+  }
+
+  // ------------------------------------------------------------ importação com IA (OCR + estrutura)
+  const AI = { files: [], text: '', busy: false, msg: '', err: false, result: null, prev: null, ctl: null, limits: undefined, sample: null };
+  function resetAi() { AI.files.forEach((f) => URL.revokeObjectURL(f.url)); Object.assign(AI, { files: [], text: '', busy: false, msg: '', err: false, result: null, prev: null, ctl: null }); }
+
+  async function aiLimits() {
+    if (AI.limits !== undefined) return AI.limits;
+    try { const sm = await window.claude?.use?.('sample'); AI.sample = sm || null; AI.limits = sm ? await sm.limits().catch(() => null) : null; }
+    catch (e) { AI.limits = null; AI.sample = null; }
+    return AI.limits;
+  }
+
+  function aiPanelHtml() {
+    const unavailable = AI.limits === null;
+    const photos = AI.limits === undefined || !!AI.limits?.images;
+    const types = (AI.limits?.images?.mediaTypes || ['image/jpeg', 'image/png', 'image/webp']).join(',');
+    return `
+      <h3>Importar com IA</h3>
+      <p class="lede-s">Fotografe a página do caderno ou do livro, use um print, ou cole o texto. A IA lê, transcreve e monta o cartão algorítmico. Você revisa antes de salvar.</p>
+      ${unavailable ? '<p class="notice" style="margin:0">A leitura com IA só funciona com o app aberto no claude.ai.</p>' : `
+        ${photos ? `
+        <div class="drop" id="ai-drop" data-act="ai-pick" role="button" tabindex="0" aria-label="Escolher fotos da receita">
+          <input type="file" id="ai-file" accept="${esc(types)}" multiple tabindex="-1">
+          <b>Escolher fotos</b>
+          <small>ou arraste para cá, ou cole uma imagem · JPG, PNG ou WebP${AI.limits?.images?.maxCount ? ` · até ${AI.limits.images.maxCount} fotos` : ''}</small>
+        </div>
+        <div class="thumbs" id="ai-thumbs"></div>` : ''}
+        <label class="f"><span>${photos ? 'Ou cole o texto da receita' : 'Cole o texto da receita'}</span><textarea id="ai-text" rows="4" placeholder="Bolo de fubá&#10;3 ovos, 1 xícara de óleo…&#10;Bata tudo no liquidificador…">${esc(AI.text)}</textarea></label>
+        <div class="ai-actions" id="ai-actions"></div>`}
+      <div id="ai-result"></div>`;
+  }
+  function paintAi() {
+    const th = document.getElementById('ai-thumbs');
+    if (th) th.innerHTML = AI.files.map((f, i) => `<div class="thumb"><img src="${f.url}" alt="Foto ${i + 1} da receita"><button type="button" data-act="ai-rm" data-i="${i}" aria-label="Remover foto ${i + 1}">×</button></div>`).join('');
+    paintAiActions();
+    const r = document.getElementById('ai-result');
+    if (r) r.innerHTML = AI.result ? `
+      <div class="ai-result">
+        <h4>Cartão montado pela IA</h4>
+        ${AI.result.duvidas.length ? `<div><b>Confira estes pontos:</b><ul>${AI.result.duvidas.map((d) => `<li>${esc(d)}</li>`).join('')}</ul></div>` : '<p class="hint">A IA não marcou dúvidas. Confira as quantidades mesmo assim.</p>'}
+        ${AI.result.transcricao ? `<details><summary>Ver transcrição da foto</summary><pre>${esc(AI.result.transcricao)}</pre></details>` : ''}
+        <div class="ai-actions"><button type="button" class="btn small" data-act="ai-undo">Desfazer importação</button><button type="button" class="btn small" data-act="ai-close">Fechar</button></div>
+      </div>` : '';
+  }
+  function paintAiActions() {
+    const el = document.getElementById('ai-actions'); if (!el) return;
+    const has = AI.files.length || AI.text.trim();
+    el.innerHTML = AI.busy
+      ? `<button type="button" class="btn small" data-act="ai-stop">Parar</button><span class="ai-status"><span class="dots">${esc(AI.msg || 'Lendo a receita')}</span></span>`
+      : `<button type="button" class="btn small solid" data-act="ai-run" ${has ? '' : 'disabled'}>❧ Ler e montar o cartão</button>${AI.msg ? `<span class="ai-status${AI.err ? ' err' : ''}">${esc(AI.msg)}</span>` : ''}`;
+  }
+  function addAiFiles(list) {
+    const types = AI.limits?.images?.mediaTypes || ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const max = AI.limits?.images?.maxCount || 5;
+    let skipped = 0;
+    [...(list || [])].forEach((f) => {
+      if (!types.includes(f.type) || AI.files.length >= max) { skipped++; return; }
+      AI.files.push({ file: f, url: URL.createObjectURL(f) });
+    });
+    AI.err = !!skipped; AI.msg = skipped ? `${skipped} arquivo(s) ignorado(s): use JPG, PNG ou WebP, até ${max} fotos.` : '';
+    paintAi();
+  }
+  // arrastar e colar imagens
+  app.addEventListener('dragover', (ev) => { const d = ev.target.closest?.('#ai-drop'); if (d) { ev.preventDefault(); d.classList.add('over'); } });
+  app.addEventListener('dragleave', (ev) => { ev.target.closest?.('#ai-drop')?.classList.remove('over'); });
+  app.addEventListener('drop', (ev) => { const d = ev.target.closest?.('#ai-drop'); if (d) { ev.preventDefault(); d.classList.remove('over'); addAiFiles(ev.dataTransfer?.files); } });
+  app.addEventListener('keydown', (ev) => { if (ev.target.id === 'ai-drop' && (ev.key === 'Enter' || ev.key === ' ')) { ev.preventDefault(); document.getElementById('ai-file')?.click(); } });
+  document.addEventListener('paste', (ev) => {
+    if (S.view !== 'editRecipe' || !AI.limits?.images) return;
+    const imgs = [...(ev.clipboardData?.files || [])].filter((f) => f.type.startsWith('image/'));
+    if (imgs.length) { ev.preventDefault(); addAiFiles(imgs); }
+  });
+
+  const AI_PROMPT = (text, nPhotos) => `Você é um editor de livros de receitas. Leia a receita ${nPhotos ? `nas ${nPhotos} foto(s) anexada(s)${text ? ' e no texto abaixo' : ''}` : 'no texto abaixo'} e reescreva-a no formato de "cartão algorítmico".
+
+No cartão algorítmico a receita é um grafo: ingredientes são folhas, e cada passo é uma operação que JUNTA ingredientes e/ou resultados de passos anteriores. O cartão é desenhado como tabela: ingredientes à esquerda, operações em colunas à direita, cada uma abraçando o que junta.
+
+Regras:
+1. "ings": ingredientes na ordem em que entram. "q" é a quantidade com unidade ("2 xícaras", "200 g", "1 pitada"); "name" é o resto ("de farinha de trigo", "ovos"). Nunca invente quantidade: se estiver ilegível ou ausente, deixe "q" vazio e registre em "duvidas".
+2. "steps": operações curtas, no infinitivo e em minúsculas ("bater no liquidificador", "dobrar", "assar"). "t" guarda tempo e temperatura separados por " · " ("180 °C · 40 min"). "inputs" lista ids de ingredientes e de passos ANTERIORES que o passo junta.
+3. Cada ingrediente e cada resultado de passo é usado por exatamente UM passo. Um passo pode ter um único input (ex.: "refrigerar" usando só o passo anterior).
+4. Cada seção termina em um único passo final que, direta ou indiretamente, usa todos os ingredientes da seção.
+5. "pre": preparativos que não transformam ingredientes (untar a forma, preaquecer o forno, forrar a assadeira).
+6. Se a receita tem partes independentes (massa, recheio, cobertura, montagem), crie uma seção por parte com "label". Na seção que usa o preparo de outra, inclua um ingrediente com "ref": true e "name" igual ao nome da parte ("recheio", "1 disco de massa"), sem "q".
+7. Detalhes que não cabem num passo curto (ponto de textura, cuidados) vão em "notes". Sugestões de servir e variações vão em "tips".
+8. "meta": Forno, Tempo, Rende e similares, somente quando constarem na receita.
+9. "transcricao": transcreva fielmente o texto das fotos, linha a linha, para o autor conferir. Sem foto, deixe vazio.
+10. "duvidas": frases curtas sobre o que estava ilegível, ambíguo ou ausente (quantidade, tempo, temperatura, ingrediente citado no preparo mas ausente da lista). Vazio se nada.
+11. Mantenha o idioma da receita original. Ids curtos e únicos na receita inteira: "i1", "i2"… para ingredientes e "p1", "p2"… para passos.
+
+Responda SOMENTE com um objeto JSON neste formato:
+{"title":"","meta":[{"k":"Forno","v":"180 °C"}],"sections":[{"label":"","pre":["Untar uma forma"],"ings":[{"id":"i1","q":"3","name":"ovos","ref":false}],"steps":[{"id":"p1","op":"bater","t":"","inputs":["i1"]}]}],"notes":[],"tips":[],"transcricao":"","duvidas":[]}
+${text ? `\nTexto fornecido pelo autor, entre as marcas <<< e >>>:\n<<<\n${text.slice(0, 20000)}\n>>>` : ''}`;
+
+  // converte a resposta da IA no formato do editor e corrige incoerências do grafo
+  function normalizeAi(d) {
+    const str = (v) => (v == null ? '' : String(v)).trim();
+    const arr = (v) => (Array.isArray(v) ? v : []);
+    const issues = [];
+    const sections = arr(d.sections).map((s) => {
+      const map = new Map();
+      const ings = arr(s.ings).map((g) => { const id = rid(); map.set(str(g.id), id); return { id, q: g.ref ? '' : str(g.q), name: str(g.name), ref: !!g.ref }; }).filter((g) => g.name || g.q);
+      const steps = arr(s.steps).map((st) => { const id = rid(); map.set(str(st.id), id); return { id, op: str(st.op), t: str(st.t), inputs: arr(st.inputs).map(str) }; });
+      const ingIds = new Set(ings.map((g) => g.id));
+      const used = new Set();
+      steps.forEach((st, k) => {
+        const earlier = new Set(steps.slice(0, k).map((x) => x.id));
+        st.inputs = st.inputs.map((x) => map.get(x)).filter((x) => x && (ingIds.has(x) || earlier.has(x)) && !used.has(x));
+        st.inputs.forEach((x) => used.add(x));
+      });
+      const label = str(s.label);
+      const sec = { id: rid(), label, pre: arr(s.pre).map(str).filter(Boolean).join('\n'), ings: ings.length ? ings : [{ id: rid(), q: '', name: '', ref: false }], steps };
+      const a = analyze(sec);
+      const tag = label ? `${label}: ` : '';
+      if (a.unused.length) issues.push(`${tag}${a.unused.length} ingrediente(s) ficaram sem passo. Marque-os em algum passo.`);
+      if (a.trees.length > 1) issues.push(`${tag}há mais de um passo final. Crie um passo que junte tudo.`);
+      return sec;
+    });
+    const meta = arr(d.meta).map((m) => ({ k: str(m.k), v: str(m.v) })).filter((m) => m.k || m.v);
+    return {
+      recipe: {
+        title: str(d.title),
+        meta: meta.length ? meta : [{ k: 'Forno', v: '' }, { k: 'Tempo', v: '' }, { k: 'Rende', v: '' }],
+        sections: sections.length ? sections : [newSection()],
+        notes: arr(d.notes).map(str).filter(Boolean).join('\n'),
+        tips: arr(d.tips).map(str).filter(Boolean).join('\n'),
+      },
+      transcricao: str(d.transcricao),
+      duvidas: [...arr(d.duvidas).map(str).filter(Boolean), ...issues],
+    };
+  }
+
+  const AI_ERR = {
+    not_granted: 'O uso da IA não foi permitido para este app.',
+    sampling_disabled: 'A IA não está disponível para esta conta.',
+    rate_limited: 'Muitas leituras seguidas. Espere um pouco e tente de novo.',
+    image_rejected: 'Uma das fotos não pôde ser lida. Tente outra foto, em JPG ou PNG.',
+    images_unavailable: 'Fotos não são aceitas aqui. Cole o texto da receita.',
+    prompt_too_large: 'O texto é grande demais. Cole só a receita.',
+    refused: 'A IA não conseguiu processar este conteúdo. Tente outra foto ou o texto.',
+    invalid_json: 'A IA respondeu fora do formato. Tente de novo.',
+    empty_completion: 'A IA não encontrou uma receita aqui. Confira a foto ou o texto.',
+    session_expired: 'Sua sessão expirou. Entre de novo no claude.ai.',
+  };
+
+  async function runAi() {
+    if (AI.busy) return;
+    await aiLimits();
+    if (!AI.sample) { AI.err = true; AI.msg = 'A IA só funciona com o app aberto no claude.ai.'; paintAi(); return; }
+    const text = AI.text.trim(); const files = AI.files.map((f) => f.file);
+    if (!text && !files.length) return;
+    AI.busy = true; AI.err = false; AI.result = null;
+    AI.msg = files.length ? 'Lendo as fotos e montando o cartão' : 'Montando o cartão';
+    AI.ctl = new AbortController(); paintAi();
+    try {
+      const data = await AI.sample.json(AI_PROMPT(text, files.length), { images: files.length ? files : undefined, modelTier: 'default', signal: AI.ctl.signal });
+      if (!data || typeof data !== 'object' || !Array.isArray(data.sections)) throw { code: 'invalid_json' };
+      const n = normalizeAi(data);
+      AI.prev = clone(S.recEdit.recipe);
+      const r = S.recEdit.recipe;
+      Object.assign(r, { title: n.recipe.title || r.title, meta: n.recipe.meta, sections: n.recipe.sections, notes: n.recipe.notes, tips: n.recipe.tips });
+      AI.result = { transcricao: n.transcricao, duvidas: n.duvidas };
+      AI.busy = false; AI.msg = ''; markDirty(); render();
+      document.getElementById('ai-panel')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    } catch (e) {
+      AI.busy = false; AI.err = e?.code !== 'cancelled';
+      AI.msg = e?.code === 'cancelled' ? 'Leitura interrompida.' : (AI_ERR[e?.code] || 'Não foi possível ler agora. Tente de novo em instantes.');
+      if (['not_granted', 'sampling_disabled', 'capability_disabled', 'capability_removed', 'not_declared'].includes(e?.code)) {
+        AI.limits = null; const el = document.getElementById('ai-panel'); if (el) el.innerHTML = aiPanelHtml();
+      }
+      paintAi();
     }
   }
 
